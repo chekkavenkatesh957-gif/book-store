@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us - Book Store</title>
+
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.contact-container{
+    width:90%;
+    max-width:600px;
+    background:white;
+    margin:40px auto;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+}
+.contact-container h2{
+    text-align:center;
+    color:#0f172a;
+    margin-bottom:20px;
+}
+.contact-container input, .contact-container textarea{
+    width:100%;
+    padding:14px;
+    margin:10px 0;
+    border:2px solid #e2e8f0;
+    border-radius:10px;
+    font-size:15px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+.contact-container input:focus, .contact-container textarea:focus{
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+.contact-container button{
+    width:100%;
+    padding:14px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1><a href="/">📚 Online Book Store</a></h1>
+<nav>
+<a href="/">Home</a>
+<a href="/contact" class="active">Contact</a>
+<a href="/cart">Cart</a>
+<a href="/orders">Order History</a>
+<span id="navAuth">
+    <a href="/login">Login</a>
+    <a href="/signup">Sign Up</a>
+</span>
+</nav>
+</header>
+
+<div class="container contact-container">
+
+<h2>Send Us a Message</h2>
+
+<form id="contactForm">
+
+<input
+type="text"
+id="name"
+placeholder="Your Full Name"
+required>
+
+<input
+type="email"
+id="email"
+placeholder="Your Email Address"
+required>
+
+<input
+type="text"
+id="subject"
+placeholder="Subject"
+required>
+
+<textarea
+id="message"
+rows="6"
+placeholder="Write your message..."
+required></textarea>
+
+<button type="submit">Send Message</button>
+
+</form>
+
+<div class="contact-info" style="margin-top: 25px; text-align: center; line-height: 28px; color: #475569;">
+<h3 style="color: #0f172a; margin-bottom: 10px;">Contact Information</h3>
+<p>📍 Address: Kakinada, Andhra Pradesh, India</p>
+<p>📞 Phone: +91 6302458954</p>
+<p>📧 Email: chekkavenkatesh957@gmail.com</p>
+</div>
+
+</div>
+
+<footer>
+<p>&copy; 2026 Book Store. All Rights Reserved.</p>
+</footer>
+
+<script src="/js/auth.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const user = getCurrentUser();
+    if (user) {
+        if (user.name) document.getElementById("name").value = user.name;
+        if (user.email) document.getElementById("email").value = user.email;
+    }
+});
+
+document.getElementById("contactForm").addEventListener("submit",function(e){
+e.preventDefault();
+
+alert("Thank you! Your message has been sent successfully.");
+
+document.getElementById("contactForm").reset();
+});
+</script>
+
+</body>
+</html>

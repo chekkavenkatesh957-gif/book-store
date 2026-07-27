@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Store - Create Account</title>
+
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.main-wrapper{ flex:1; display:flex; justify-content:center; align-items:center; padding:40px 15px; }
+.signup-box{ width:100%; max-width:440px; background:#fff; padding:35px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.08); border:1px solid #e2e8f0; }
+.signup-box h2{ text-align:center; color:#0f172a; margin-bottom:20px; font-size:26px; }
+.signup-box input{ width:100%; padding:14px; margin:10px 0; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; box-sizing:border-box; outline:none; transition:all 0.2s ease; }
+.signup-box input:focus{ border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,0.15); }
+.btn-primary{ width:100%; padding:14px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:16px; cursor:pointer; font-weight:bold; margin-top:15px; box-shadow:0 4px 15px rgba(16,185,129,0.3); transition:all 0.2s; }
+.btn-primary:hover{ box-shadow:0 6px 20px rgba(16,185,129,0.4); transform:translateY(-1px); }
+</style>
+</head>
+<body>
+
+<header>
+    <h1><a href="/">📚 Online Book Store</a></h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/contact">Contact</a>
+        <a href="/cart">Cart</a>
+        <a href="/orders">Order History</a>
+        <span id="navAuth">
+            <a href="/login">Login</a>
+            <a href="/signup" class="active">Sign Up</a>
+        </span>
+    </nav>
+</header>
+
+<div class="main-wrapper">
+    <div class="signup-box">
+        <h2>Create Account</h2>
+
+        <form id="signupForm">
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="email" id="email" placeholder="Email Address" required>
+            <input type="password" id="password" placeholder="Password (min. 6 characters)" required minlength="6">
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required minlength="6">
+            
+            <button type="submit" id="submitBtn" class="btn-primary">
+                🚀 Create Account
+            </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+            Already have an account? <a href="/login" style="color: #2563eb; font-weight: bold;">Login</a>
+        </p>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 Online Book Store. All Rights Reserved.</p>
+</footer>
+
+<script src="/js/auth.js"></script>
+
+<script>
+document.getElementById("signupForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim().toLowerCase();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match. Please check and try again.");
+        return;
+    }
+
+    const submitBtn = document.getElementById("submitBtn");
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "⏳ Creating Account...";
+
+    try {
+        const response = await fetch("/api/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await safeParseResponse(response);
+
+        if (response.ok) {
+            if (data.user) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+            }
+            alert("🎉 Account Created Successfully! Welcome, " + (data.user ? data.user.name : name));
+            window.location.href = "/";
+        } else {
+            alert(data.message || "Signup failed");
+        }
+    } catch (err) {
+        alert(err.message || "Request failed. Please try again.");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "🚀 Create Account";
+    }
+});
+</script>
+
+</body>
+</html>

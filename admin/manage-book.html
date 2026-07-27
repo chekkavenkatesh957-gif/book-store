@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Books</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f4f4;
+    margin:0;
+}
+header{
+    background:#0d6efd;
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+.container{
+    width:90%;
+    margin:20px auto;
+}
+.top{
+    margin-bottom:20px;
+}
+a{
+    text-decoration:none;
+}
+.add-btn{
+    background:green;
+    color:white;
+    padding:10px 15px;
+    border-radius:5px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+th{
+    background:#0d6efd;
+    color:white;
+}
+.edit{
+    background:orange;
+    color:white;
+    padding:6px 12px;
+    border:none;
+    cursor:pointer;
+}
+.delete{
+    background:red;
+    color:white;
+    padding:6px 12px;
+    border:none;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>Manage Books</h2>
+</header>
+
+<div class="container">
+
+<div class="top">
+<a href="/add-book" class="add-btn">+ Add New Book</a>
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Title</th>
+<th>Author</th>
+<th>Price</th>
+<th>Category</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="bookTable"></tbody>
+
+</table>
+
+</div>
+
+<script>
+async function loadBooks(){
+
+const res = await fetch("/api/books");
+const books = await res.json();
+
+const table = document.getElementById("bookTable");
+table.innerHTML="";
+
+books.forEach(book=>{
+
+table.innerHTML += `
+<tr>
+<td>${book.title}</td>
+<td>${book.author}</td>
+<td>₹${book.price}</td>
+<td>${book.category}</td>
+
+<td>
+<button class="edit"
+onclick="editBook('${book._id}')">
+Edit
+</button>
+
+<button class="delete"
+onclick="deleteBook('${book._id}')">
+Delete
+</button>
+</td>
+
+</tr>
+`;
+
+});
+
+}
+
+function editBook(id){
+window.location.href="/edit-book?id="+id;
+}
+
+async function deleteBook(id){
+
+if(confirm("Delete this book?")){
+
+await fetch("/api/books/"+id,{
+method:"DELETE"
+});
+
+loadBooks();
+
+}
+
+}
+
+loadBooks();
+</script>
+
+</body>
+</html>

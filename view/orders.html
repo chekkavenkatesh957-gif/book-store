@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order History - Online Book Store</title>
+
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.page-title{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+.page-title h2{ color: #0d47a1; font-size: 28px; }
+.user-badge{ background: #e3f2fd; color: #0d47a1; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+.filter-bar{ display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+.search-input{ flex: 1; min-width: 250px; padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; outline: none; }
+.status-filter{ padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; background: white; outline: none; cursor: pointer; }
+.order-card{ background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); margin-bottom: 25px; overflow: hidden; border: 1px solid #e0e0e0; }
+.order-header{ background: #f8f9fa; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 10px; }
+.order-info-meta{ display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.order-id{ font-weight: 700; color: #1a237e; font-size: 16px; }
+.status-badge{ padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+.status-Pending{ background: #fff3cd; color: #856404; }
+.status-Processing{ background: #cce5ff; color: #004085; }
+.status-Shipped{ background: #d1ecf1; color: #0c5460; }
+.status-Delivered{ background: #d4edda; color: #155724; }
+.status-Cancelled{ background: #f8d7da; color: #721c24; }
+.customer-details{ padding: 12px 24px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-size: 14px; color: #555; }
+.order-items{ padding: 20px 24px; }
+.item-row{ display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #eee; }
+.order-footer{ padding: 16px 24px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; flex-wrap: wrap; gap: 12px; }
+.order-total{ font-size: 18px; font-weight: 700; color: #2e7d32; }
+.btn-reorder{ padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; background: #0d47a1; color: white; }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1><a href="/">📚 Online Book Store</a></h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/contact">Contact</a>
+        <a href="/cart">Cart (<span id="cartCount">0</span>)</a>
+        <a href="/orders" class="active">Order History</a>
+        <span id="navAuth">
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        </span>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="page-title">
+        <h2>📜 Your Cart & Order History</h2>
+        <div id="userInfo" class="user-badge">Guest Account</div>
+    </div>
+
+    <div class="filter-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by Order ID, Book Title, or Author..." oninput="filterOrders()">
+        <select id="statusSelect" class="status-filter" onchange="filterOrders()">
+            <option value="ALL">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+    </div>
+
+    <div id="ordersContainer"></div>
+</div>
+
+<footer>
+    <p>© 2026 Online Book Store. All Rights Reserved.</p>
+</footer>
+
+<script src="/js/auth.js"></script>
+
+<script>
+let allOrders = [];
+let currentUser = getCurrentUser();
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateUserInfoBadge();
+    updateCartCount();
+    loadOrderHistory();
+});
+
+function updateUserInfoBadge() {
+    const userInfo = document.getElementById("userInfo");
+    if (userInfo && currentUser) {
+        userInfo.innerHTML = `<span style="cursor:pointer;" onclick="showUserProfileModal()">👤 ${escapeHtml(currentUser.name)} (${escapeHtml(currentUser.email)})</span>`;
+    }
+}
+
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem("bookstoreCart")) || [];
+    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    document.getElementById("cartCount").textContent = count;
+}
+
+async function loadOrderHistory() {
+    let serverOrders = [];
+    try {
+        const endpoint = currentUser ? `/api/orders/user/${encodeURIComponent(currentUser.email)}` : `/api/orders`;
+        const res = await fetch(endpoint);
+        const data = await safeParseResponse(res);
+        if (res.ok && Array.isArray(data)) serverOrders = data;
+    } catch (err) {}
+
+    const localOrders = JSON.parse(localStorage.getItem("bookstoreOrderHistory")) || [];
+    const orderMap = new Map();
+
+    serverOrders.forEach(o => orderMap.set(o._id || o.id, o));
+    localOrders.forEach(o => {
+        const key = o._id || o.id || o.orderId;
+        if (!orderMap.has(key)) orderMap.set(key, o);
+    });
+
+    allOrders = Array.from(orderMap.values());
+    allOrders.sort((a, b) => new Date(b.createdAt || b.date || Date.now()) - new Date(a.createdAt || a.date || Date.now()));
+
+    renderOrders(allOrders);
+}
+
+function renderOrders(orders) {
+    const container = document.getElementById("ordersContainer");
+    if (!orders || orders.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 50px;"><h3>No Orders Found</h3></div>`;
+        return;
+    }
+
+    container.innerHTML = orders.map((order, idx) => {
+        const orderId = order._id ? `#ORD-${order._id.substring(order._id.length - 8).toUpperCase()}` : (order.orderId || `#ORD-LOCAL-${idx + 1}`);
+        const formattedDate = new Date(order.createdAt || order.date || Date.now()).toLocaleString();
+        const status = order.status || 'Pending';
+        const items = order.items || [];
+        const total = order.totalAmount || items.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
+
+        return `
+            <div class="order-card">
+                <div class="order-header">
+                    <span class="order-id">${orderId}</span>
+                    <span>📅 ${formattedDate}</span>
+                    <span class="status-badge status-${status}">${status}</span>
+                </div>
+                <div class="customer-details">👤 ${order.customerName || "Customer"} (${order.customerEmail || "N/A"})</div>
+                <div class="order-items">
+                    ${items.map(i => `
+                        <div class="item-row">
+                            <div>📖 ${i.title} (${i.author || ''})</div>
+                            <div>₹${i.price} × ${i.quantity || 1} = ₹${(i.price * (i.quantity || 1)).toFixed(2)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="order-footer">
+                    <div class="order-total">Total: ₹${Number(total).toFixed(2)}</div>
+                    <button class="btn-reorder" onclick="reorderItems(${JSON.stringify(items).replace(/"/g, '&quot;')})">🔄 Re-order</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function filterOrders() {
+    const term = document.getElementById("searchInput").value.toLowerCase();
+    const status = document.getElementById("statusSelect").value;
+    renderOrders(allOrders.filter(o => {
+        const matchesTerm = (o._id || o.orderId || "").toLowerCase().includes(term) || (o.items || []).some(i => (i.title || "").toLowerCase().includes(term));
+        const matchesStatus = status === "ALL" || (o.status || "Pending") === status;
+        return matchesTerm && matchesStatus;
+    }));
+}
+
+function reorderItems(items) {
+    const user = getCurrentUser();
+    if (!user) {
+        alert("Please log in first to add books to your cart!");
+        window.location.href = "/login";
+        return;
+    }
+    let cart = JSON.parse(localStorage.getItem("bookstoreCart")) || [];
+    items.forEach(i => cart.push({ id: Date.now().toString(), title: i.title, author: i.author || "", price: i.price, quantity: i.quantity || 1 }));
+    localStorage.setItem("bookstoreCart", JSON.stringify(cart));
+    window.location.href = "/cart";
+}
+</script>
+</body>
+</html>

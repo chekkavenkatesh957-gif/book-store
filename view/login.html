@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Store Login</title>
+
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.main-wrapper{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:40px 15px;
+}
+.login-box{
+    width:100%;
+    max-width:420px;
+    background:#fff;
+    padding:35px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+}
+.login-box h2{
+    text-align:center;
+    color:#0f172a;
+    margin-bottom:20px;
+    font-size: 26px;
+}
+.login-box input{
+    width:100%;
+    padding:14px;
+    margin:10px 0;
+    border:2px solid #e2e8f0;
+    border-radius:10px;
+    font-size:15px;
+    box-sizing:border-box;
+    outline: none;
+    transition: all 0.2s ease;
+}
+.login-box input:focus{
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+.login-box button{
+    width:100%;
+    padding:14px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    cursor:pointer;
+    font-weight:bold;
+    margin-top:15px;
+    box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+}
+.login-box button:hover{
+    box-shadow: 0 6px 20px rgba(37,99,235,0.4);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1><a href="/">📚 Online Book Store</a></h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/contact">Contact</a>
+        <a href="/cart">Cart</a>
+        <a href="/orders">Order History</a>
+        <span id="navAuth">
+            <a href="/login" class="active">Login</a>
+            <a href="/signup">Sign Up</a>
+        </span>
+    </nav>
+</header>
+
+<div class="main-wrapper">
+    <div class="login-box">
+
+        <h2>Book Store Login</h2>
+
+        <form id="loginForm">
+
+        <input
+        type="email"
+        id="email"
+        placeholder="Email Address"
+        required>
+
+        <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        required>
+
+        <button type="submit">Login</button>
+
+        </form>
+
+        <p>
+        Don't have an account?
+        <a href="/signup">Sign Up</a>
+        </p>
+
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 Online Book Store. All Rights Reserved.</p>
+</footer>
+
+<script src="/js/auth.js"></script>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
+
+    try {
+        const response = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                email,
+                password
+            })
+        });
+
+        const data = await safeParseResponse(response);
+
+        if(response.ok){
+            if (data.user) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+            }
+            alert("Login Successful! Welcome, " + (data.user ? data.user.name : ""));
+            window.location.href = "/";
+        }else{
+            alert(data.message || "Login failed");
+        }
+    } catch(err) {
+        alert(err.message || "Connection error. Please try again.");
+    }
+
+});
+</script>
+
+</body>
+</html>

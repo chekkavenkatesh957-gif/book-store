@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Sign Up</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f6f9;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.signup-box{
+    width:400px;
+    background:#fff;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 0 15px rgba(0,0,0,0.2);
+}
+
+h2{
+    text-align:center;
+    color:#0d6efd;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    background:#198754;
+    color:white;
+    border:none;
+    border-radius:5px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#157347;
+}
+
+a{
+    text-decoration:none;
+    color:#0d6efd;
+}
+</style>
+</head>
+
+<body>
+
+<div class="signup-box">
+
+<h2>Admin Sign Up</h2>
+
+<form id="adminSignupForm">
+
+<input type="text" id="name" placeholder="Full Name" required>
+
+<input type="email" id="email" placeholder="Admin Email" required>
+
+<input type="password" id="password" placeholder="Password" required>
+
+<input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+
+<button type="submit">Create Admin Account</button>
+
+</form>
+
+<p>
+Already have an account?
+<a href="/admin/login">Admin Login</a>
+</p>
+
+</div>
+
+<script>
+
+document.getElementById("adminSignupForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const name=document.getElementById("name").value;
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
+const confirmPassword=document.getElementById("confirmPassword").value;
+
+if(password!==confirmPassword){
+alert("Passwords do not match");
+return;
+}
+
+const response=await fetch("/api/admin/signup",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+name,
+email,
+password
+})
+});
+
+const data=await response.json();
+
+if(response.ok){
+alert("Admin account created successfully");
+window.location.href="/admin/login";
+}else{
+alert(data.message);
+}
+
+});
+
+</script>
+
+</body>
+</html>

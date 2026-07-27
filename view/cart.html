@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping Cart - Online Book Store</title>
+
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.cart-table-card{
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.page-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.page-header h2{
+    color: #0f172a;
+    font-size: 26px;
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td{
+    padding: 15px 18px;
+    text-align: left;
+}
+
+th{
+    background: #0f172a;
+    color: white;
+    font-weight: 600;
+}
+
+tr:nth-child(even){
+    background-color: #f8fafc;
+}
+
+tr:hover{
+    background-color: #f1f5f9;
+}
+
+.qty-control{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.qty-btn{
+    width: 28px;
+    height: 28px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.qty-btn:hover{
+    background: #e2e8f0;
+}
+
+.remove-btn{
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.remove-btn:hover{
+    background: #dc2626;
+}
+
+.cart-summary{
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-top: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.checkout-form{
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+@media (max-width: 600px) {
+    .checkout-form{
+        grid-template-columns: 1fr;
+    }
+}
+
+.checkout-form label{
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: #334155;
+}
+
+.checkout-form input{
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.checkout-form input:focus{
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.btn-checkout{
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+}
+
+.btn-checkout:hover{
+    box-shadow: 0 6px 20px rgba(16,185,129,0.4);
+}
+
+.btn-checkout:disabled{
+    background: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.empty-cart{
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #64748b;
+}
+
+/* Success Modal */
+.modal-overlay{
+    display: none;
+    position: fixed;
+    top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-card{
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-icon{
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+.modal-btn{
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #0f172a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1><a href="/">📚 Online Book Store</a></h1>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/contact">Contact</a>
+        <a href="/cart" class="active">Cart (<span id="cartCount">0</span>)</a>
+        <a href="/orders">Order History</a>
+        <span id="navAuth">
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        </span>
+    </nav>
+</header>
+
+<div class="container">
+
+    <div class="page-header">
+        <h2>🛒 Shopping Cart</h2>
+    </div>
+
+    <div class="cart-table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Author</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="cartBody"></tbody>
+        </table>
+    </div>
+
+    <div class="cart-summary">
+        <h3 id="grandTotal" style="color: #0f172a; font-size: 22px;">Grand Total: ₹0</h3>
+
+        <div class="checkout-form">
+            <div>
+                <label for="custName">Customer Name:</label>
+                <input type="text" id="custName" placeholder="Enter your full name" required>
+            </div>
+            <div>
+                <label for="custEmail">Customer Email:</label>
+                <input type="email" id="custEmail" placeholder="Enter your email address" required>
+            </div>
+        </div>
+
+        <button id="checkoutBtn" class="btn-checkout" onclick="checkout()">
+            🚀 Place Order & Proceed to Checkout
+        </button>
+    </div>
+
+</div>
+
+<!-- Modal Dialog -->
+<div id="successModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-icon">🎉</div>
+        <h2 style="color: #0f172a;">Order Placed Successfully!</h2>
+        <p style="margin-top: 10px; color: #64748b;">Thank you for your purchase. Your order has been saved to your Order History.</p>
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+            <a href="/orders" class="modal-btn">📜 View Order History</a>
+            <a href="/" class="modal-btn" style="background: #64748b;">🏠 Back to Shop</a>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 Online Book Store. All Rights Reserved.</p>
+</footer>
+
+<script src="/js/auth.js"></script>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("bookstoreCart")) || [];
+let currentUser = getCurrentUser();
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (currentUser) {
+        if (currentUser.name) document.getElementById("custName").value = currentUser.name;
+        if (currentUser.email) document.getElementById("custEmail").value = currentUser.email;
+    }
+    loadCart();
+});
+
+function loadCart() {
+    const body = document.getElementById("cartBody");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    body.innerHTML = "";
+
+    let total = 0;
+    let totalItems = 0;
+
+    if (cart.length === 0) {
+        body.innerHTML = `<tr><td colspan="6" class="empty-cart">Your cart is empty. <a href="/" style="color: #2563eb; font-weight: bold;">Continue Shopping</a></td></tr>`;
+        document.getElementById("grandTotal").textContent = "Grand Total: ₹0";
+        document.getElementById("cartCount").textContent = "0";
+        checkoutBtn.disabled = true;
+        return;
+    }
+
+    checkoutBtn.disabled = false;
+
+    cart.forEach((item, index) => {
+        const qty = item.quantity || 1;
+        const sub = item.price * qty;
+        total += sub;
+        totalItems += qty;
+
+        body.innerHTML += `
+            <tr>
+                <td><strong>${escapeHtml(item.title)}</strong></td>
+                <td>${escapeHtml(item.author || "Unknown")}</td>
+                <td>₹${item.price}</td>
+                <td>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                        <span>${qty}</span>
+                        <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                    </div>
+                </td>
+                <td><strong>₹${sub.toFixed(2)}</strong></td>
+                <td>
+                    <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("grandTotal").textContent = `Grand Total: ₹${total.toFixed(2)}`;
+    document.getElementById("cartCount").textContent = totalItems;
+}
+
+function updateQty(index, change) {
+    if (cart[index]) {
+        cart[index].quantity = (cart[index].quantity || 1) + change;
+        if (cart[index].quantity <= 0) {
+            cart.splice(index, 1);
+        }
+        localStorage.setItem("bookstoreCart", JSON.stringify(cart));
+        loadCart();
+    }
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    localStorage.setItem("bookstoreCart", JSON.stringify(cart));
+    loadCart();
+}
+
+async function checkout() {
+    const user = getCurrentUser();
+    if (!user) {
+        alert("Please log in to place an order.");
+        window.location.href = "/login";
+        return;
+    }
+
+    if (cart.length === 0) {
+        alert("Your cart is empty.");
+        return;
+    }
+
+    const name = document.getElementById("custName").value.trim();
+    const email = document.getElementById("custEmail").value.trim();
+
+    if (!name || !email) {
+        alert("Please enter your Customer Name and Email to place the order.");
+        return;
+    }
+
+    const totalAmount = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+
+    const orderPayload = {
+        customerName: name,
+        customerEmail: email,
+        items: cart.map(item => ({
+            title: item.title,
+            author: item.author || "",
+            price: item.price,
+            quantity: item.quantity || 1
+        })),
+        totalAmount: totalAmount,
+        status: "Pending"
+    };
+
+    let createdOrder = null;
+
+    try {
+        const response = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderPayload)
+        });
+
+        if (response.ok) {
+            createdOrder = await safeParseResponse(response);
+        }
+    } catch (err) {
+        console.warn("Server connection failed, saving order locally:", err);
+    }
+
+    if (!createdOrder) {
+        createdOrder = {
+            ...orderPayload,
+            orderId: `ORD-LOCAL-${Date.now()}`,
+            createdAt: new Date().toISOString()
+        };
+    }
+
+    // Save to Local Order History
+    const history = JSON.parse(localStorage.getItem("bookstoreOrderHistory")) || [];
+    history.unshift(createdOrder);
+    localStorage.setItem("bookstoreOrderHistory", JSON.stringify(history));
+
+    // Clear Cart
+    cart = [];
+    localStorage.removeItem("bookstoreCart");
+    loadCart();
+
+    // Show Success Modal
+    document.getElementById("successModal").style.display = "flex";
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+</script>
+
+</body>
+</html>
