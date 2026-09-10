@@ -9,11 +9,25 @@
 <style>
 .main-wrapper{ flex:1; display:flex; justify-content:center; align-items:center; padding:40px 15px; }
 .signup-box{ width:100%; max-width:440px; background:#fff; padding:35px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.08); border:1px solid #e2e8f0; }
-.signup-box h2{ text-align:center; color:#0f172a; margin-bottom:20px; font-size:26px; }
+.signup-box h2{ text-align:center; color:#0f172a; margin-bottom:15px; font-size:26px; }
 .signup-box input{ width:100%; padding:14px; margin:10px 0; border:2px solid #e2e8f0; border-radius:10px; font-size:15px; box-sizing:border-box; outline:none; transition:all 0.2s ease; }
 .signup-box input:focus{ border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,0.15); }
+.otp-input { text-align: center; font-size: 24px !important; letter-spacing: 8px; font-weight: bold; color: #0f172a; }
 .btn-primary{ width:100%; padding:14px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:16px; cursor:pointer; font-weight:bold; margin-top:15px; box-shadow:0 4px 15px rgba(16,185,129,0.3); transition:all 0.2s; }
 .btn-primary:hover{ box-shadow:0 6px 20px rgba(16,185,129,0.4); transform:translateY(-1px); }
+.btn-secondary{ background: #64748b; margin-top: 10px; }
+.info-banner { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 15px; text-align: center; line-height: 1.4; }
+.resend-box { text-align: center; margin-top: 15px; font-size: 14px; color: #64748b; }
+.resend-box button { background: none; border: none; color: #2563eb; font-weight: bold; cursor: pointer; text-decoration: underline; padding: 0; font-size: 14px; }
+.pw-wrap { position: relative; width: 100%; }
+.pw-wrap input { padding-right: 46px !important; }
+.pw-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; padding: 0;
+    font-size: 18px; color: #94a3b8; line-height: 1;
+    display: flex; align-items: center;
+}
+.pw-toggle:hover { color: #10b981; }
 </style>
 </head>
 <body>
@@ -34,22 +48,58 @@
 
 <div class="main-wrapper">
     <div class="signup-box">
-        <h2>Create Account</h2>
+        
+        <!-- STEP 1: SIGNUP FORM -->
+        <div id="stepSignup">
+            <h2>Create Account</h2>
 
-        <form id="signupForm">
-            <input type="text" id="name" placeholder="Full Name" required>
-            <input type="email" id="email" placeholder="Email Address" required>
-            <input type="password" id="password" placeholder="Password (min. 6 characters)" required minlength="6">
-            <input type="password" id="confirmPassword" placeholder="Confirm Password" required minlength="6">
-            
-            <button type="submit" id="submitBtn" class="btn-primary">
-                🚀 Create Account
-            </button>
-        </form>
+            <form id="signupForm">
+                <input type="text" id="name" placeholder="Full Name" required>
+                <input type="email" id="email" placeholder="Gmail / Email Address" required>
+                <div class="pw-wrap">
+                    <input type="password" id="password" placeholder="Password (min. 6 characters)" required minlength="6">
+                    <button type="button" class="pw-toggle" onclick="togglePw('password', this)" title="Show/hide password">👁️</button>
+                </div>
+                <div class="pw-wrap">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required minlength="6">
+                    <button type="button" class="pw-toggle" onclick="togglePw('confirmPassword', this)" title="Show/hide password">👁️</button>
+                </div>
+                
+                <button type="submit" id="submitBtn" class="btn-primary">
+                    🚀 Create Account
+                </button>
+            </form>
 
-        <p style="text-align: center; margin-top: 20px; font-size: 14px;">
-            Already have an account? <a href="/login" style="color: #2563eb; font-weight: bold;">Login</a>
-        </p>
+            <p style="text-align: center; margin-top: 20px; font-size: 14px;">
+                Already have an account? <a href="/login" style="color: #2563eb; font-weight: bold;">Login</a>
+            </p>
+        </div>
+
+        <!-- STEP 2: OTP VERIFICATION -->
+        <div id="stepOtp" style="display: none;">
+            <h2>Verify Gmail Code</h2>
+            <div class="info-banner">
+                📧 <strong>OTP Code Sent!</strong><br>
+                Please check your inbox at <br><span id="targetEmailDisplay" style="font-weight: bold; color: #0f172a;"></span>
+            </div>
+
+            <form id="otpForm">
+                <input type="text" id="otpCode" class="otp-input" placeholder="------" maxlength="6" pattern="\d{6}" required autocomplete="off">
+                
+                <button type="submit" id="verifyBtn" class="btn-primary">
+                    ✅ Verify & Complete Registration
+                </button>
+            </form>
+
+            <div class="resend-box">
+                Didn't receive the OTP? <button type="button" id="resendBtn">Resend OTP</button>
+            </div>
+
+            <p style="text-align: center; margin-top: 15px; font-size: 13px;">
+                <a href="#" id="backToSignupBtn" style="color: #64748b; text-decoration: none;">← Change Email / Back</a>
+            </p>
+        </div>
+
     </div>
 </div>
 
@@ -60,6 +110,32 @@
 <script src="/js/auth.js"></script>
 
 <script>
+let currentPendingEmail = "";
+
+// Check URL params for pending verification email from Login page redirect
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const verifyEmail = urlParams.get("verifyEmail");
+    if (verifyEmail) {
+        showOtpStep(verifyEmail);
+    }
+});
+
+function showOtpStep(email) {
+    currentPendingEmail = email;
+    document.getElementById("targetEmailDisplay").textContent = email;
+    document.getElementById("stepSignup").style.display = "none";
+    document.getElementById("stepOtp").style.display = "block";
+    document.getElementById("otpCode").focus();
+}
+
+document.getElementById("backToSignupBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("stepOtp").style.display = "none";
+    document.getElementById("stepSignup").style.display = "block";
+});
+
+// Step 1: Submit Registration Form
 document.getElementById("signupForm").addEventListener("submit", async function(e){
     e.preventDefault();
 
@@ -75,7 +151,7 @@ document.getElementById("signupForm").addEventListener("submit", async function(
 
     const submitBtn = document.getElementById("submitBtn");
     submitBtn.disabled = true;
-    submitBtn.innerHTML = "⏳ Creating Account...";
+    submitBtn.innerHTML = "⏳ Sending OTP...";
 
     try {
         const response = await fetch("/api/auth/signup", {
@@ -87,11 +163,8 @@ document.getElementById("signupForm").addEventListener("submit", async function(
         const data = await safeParseResponse(response);
 
         if (response.ok) {
-            if (data.user) {
-                localStorage.setItem("user", JSON.stringify(data.user));
-            }
-            alert("🎉 Account Created Successfully! Welcome, " + (data.user ? data.user.name : name));
-            window.location.href = "/";
+            alert(data.message || "OTP code sent to your Gmail!");
+            showOtpStep(email);
         } else {
             alert(data.message || "Signup failed");
         }
@@ -102,6 +175,81 @@ document.getElementById("signupForm").addEventListener("submit", async function(
         submitBtn.innerHTML = "🚀 Create Account";
     }
 });
+
+// Step 2: Submit OTP Verification
+document.getElementById("otpForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const otp = document.getElementById("otpCode").value.trim();
+    if (!otp || otp.length !== 6) {
+        alert("Please enter a valid 6-digit OTP code.");
+        return;
+    }
+
+    const verifyBtn = document.getElementById("verifyBtn");
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = "⏳ Verifying OTP...";
+
+    try {
+        const response = await fetch("/api/auth/verify-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: currentPendingEmail, otp })
+        });
+
+        const data = await safeParseResponse(response);
+
+        if (response.ok) {
+            if (data.user) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+            }
+            alert(data.message || "Email verified successfully!");
+            window.location.href = "/";
+        } else {
+            alert(data.message || "Invalid OTP code");
+        }
+    } catch (err) {
+        alert(err.message || "Verification request failed.");
+    } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = "✅ Verify & Complete Registration";
+    }
+});
+
+// Resend OTP handler
+document.getElementById("resendBtn").addEventListener("click", async function(){
+    if (!currentPendingEmail) return;
+
+    this.disabled = true;
+    this.textContent = "⏳ Resending...";
+
+    try {
+        const response = await fetch("/api/auth/resend-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: currentPendingEmail })
+        });
+
+        const data = await safeParseResponse(response);
+        alert(data.message || "New OTP has been sent.");
+    } catch (err) {
+        alert("Failed to resend OTP code.");
+    } finally {
+        this.disabled = false;
+        this.textContent = "Resend OTP";
+    }
+});
+
+function togglePw(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+    }
+}
 </script>
 
 </body>

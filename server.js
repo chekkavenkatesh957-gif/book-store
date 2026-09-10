@@ -8,7 +8,7 @@ const booksRoute = require("./routes/books");
 const authRoute = require("./routes/auth");
 const adminRoute = require("./routes/admin");
 const ordersRoute = require("./routes/orders")
-const User = require("./models/User");
+const User = require("./models/user");
 
 const app = express();
 
@@ -24,7 +24,10 @@ app.use(express.urlencoded({ extended: true }));
 // ========================
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/bookstore";
 mongoose
-  .connect(MONGO_URI)
+  .connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  })
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.log("MongoDB Error:", err));
 
@@ -163,6 +166,10 @@ app.use((req, res) => {
 // ========================
 const PORT = process.env.PORT || 5045;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server running at http://localhost:${PORT} and accessible across local network`);
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Server running at http://localhost:${PORT} and accessible across local network`);
+  });
+}
+
+module.exports = app;

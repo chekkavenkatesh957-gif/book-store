@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Book = require("../models/Book");
+const Book = require("../models/book");
 
 // Get all books
 router.get("/", async (req, res) => {
@@ -15,9 +15,9 @@ router.get("/", async (req, res) => {
 // Add a new book
 router.post("/", async (req, res) => {
     try {
-        const book = new Book(req.body);
-        await book.save();
-        res.status(201).json(book);
+        const newBook = new Book(req.body);
+        await newBook.save();
+        res.status(201).json(newBook);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
@@ -31,6 +31,9 @@ router.put("/:id", async (req, res) => {
             req.body,
             { new: true }
         );
+        if (!updatedBook) {
+            return res.status(404).json({ message: "Book not found" });
+        }
         res.json(updatedBook);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -40,11 +43,14 @@ router.put("/:id", async (req, res) => {
 // Delete a book
 router.delete("/:id", async (req, res) => {
     try {
-        await Book.findByIdAndDelete(req.params.id);
+        const deletedBook = await Book.findByIdAndDelete(req.params.id);
+        if (!deletedBook) {
+            return res.status(404).json({ message: "Book not found" });
+        }
         res.json({ message: "Book deleted successfully" });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-module.exports = router
+module.exports = router;

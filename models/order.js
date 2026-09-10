@@ -46,6 +46,20 @@ const orderSchema = new mongoose.Schema(
       default: "Pending",
       enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
     },
+
+    paymentMethod: {
+      type: String,
+      default: "Cash on Delivery",
+    },
+
+    deliveryAddress: {
+      street: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      zipCode: { type: String, default: "" },
+      phone: { type: String, default: "" },
+      fullAddress: { type: String, default: "" }
+    },
   },
   {
     timestamps: true,

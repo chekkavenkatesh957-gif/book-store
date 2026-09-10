@@ -67,6 +67,8 @@ a{
 
 <input type="text" id="category" placeholder="Category" required>
 
+<input type="text" id="image" placeholder="Book Image Filename or URL (e.g. java.jpg)">
+
 <button type="submit">Update Book</button>
 
 </form>
@@ -79,6 +81,26 @@ a{
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
 
+async function loadBookDetails() {
+    if (!id) return;
+    try {
+        const res = await fetch("/api/books");
+        const books = await res.json();
+        const book = books.find(b => (b._id === id || b.id === id));
+        if (book) {
+            document.getElementById("title").value = book.title || "";
+            document.getElementById("author").value = book.author || "";
+            document.getElementById("price").value = book.price || "";
+            document.getElementById("category").value = book.category || "";
+            document.getElementById("image").value = book.image || "";
+        }
+    } catch (e) {
+        console.error("Failed to load book details", e);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", loadBookDetails);
+
 document.getElementById("editBookForm").addEventListener("submit", async function(e){
     e.preventDefault();
 
@@ -86,7 +108,8 @@ document.getElementById("editBookForm").addEventListener("submit", async functio
         title: document.getElementById("title").value,
         author: document.getElementById("author").value,
         price: document.getElementById("price").value,
-        category: document.getElementById("category").value
+        category: document.getElementById("category").value,
+        image: document.getElementById("image").value
     };
 
     const res = await fetch("/api/books/" + id, {

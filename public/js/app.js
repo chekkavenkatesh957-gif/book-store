@@ -28,7 +28,15 @@ function updateCartCount() {
     if (cartCount) cartCount.textContent = totalItems;
 }
 
-function addToCart(bookId, title, price, author) {
+function resolveBookImage(imagePath) {
+    if (!imagePath) return '/images/default-book.png';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:') || imagePath.startsWith('/')) {
+        return imagePath;
+    }
+    return `/images/${imagePath}`;
+}
+
+function addToCart(bookId, title, price, author, image) {
     const user = typeof getCurrentUser === "function" ? getCurrentUser() : JSON.parse(localStorage.getItem("user"));
     if (!user) {
         alert("Please log in first to add books to your cart!");
@@ -40,7 +48,7 @@ function addToCart(bookId, title, price, author) {
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        cart.push({ id: bookId, title, price, author, quantity: 1 });
+        cart.push({ id: bookId, title, price, author, image: image || '', quantity: 1 });
     }
     saveCart();
     showNotification(`"${title}" added to cart!`);
@@ -133,19 +141,21 @@ function displayBooks(books) {
         return;
     }
 
-    booksList.innerHTML = books.map(book => `
+    booksList.innerHTML = books.map(book => {
+        return `
         <div class="book-card">
             <div>
                 <h3>${escapeHtml(book.title)}</h3>
                 <span class="author">By ${escapeHtml(book.author || "Unknown")}</span>
-                <span class="category">${escapeHtml(book.category || "General")}</span>
+                <div style="margin: 8px 0;"><span class="category">${escapeHtml(book.category || "General")}</span></div>
                 <p class="price">₹${book.price}</p>
             </div>
             <div class="book-actions">
                 <button class="btn-small btn-cart" onclick="addToCart('${book._id || book.id}', '${escapeHtml(book.title)}', ${book.price}, '${escapeHtml(book.author || '')}')">🛒 Add to Cart</button>
             </div>
         </div>
-    `).join("");
+        `;
+    }).join("");
 }
 
 function escapeHtml(str) {

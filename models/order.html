@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Orders - Admin</title>
+
+<style>
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    color: #333;
+}
+
+header{
+    background:#0d47a1;
+    color:#fff;
+    padding:18px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+header h2 a{
+    color: white;
+    text-decoration: none;
+}
+
+.back-btn{
+    color: white;
+    text-decoration: none;
+    background: rgba(255,255,255,0.2);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.back-btn:hover{
+    background: rgba(255,255,255,0.3);
+}
+
+.container{
+    width:94%;
+    max-width: 1100px;
+    margin:30px auto;
+}
+
+.table-card{
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    padding:14px;
+    text-align:left;
+    font-size: 14px;
+}
+
+th{
+    background:#0d47a1;
+    color:#fff;
+    font-weight: 600;
+}
+
+tr:nth-child(even){
+    background: #f9fbfd;
+}
+
+tr:hover{
+    background: #f1f5f9;
+}
+
+select{
+    padding:6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    outline: none;
+}
+
+button.save-btn{
+    padding:6px 14px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    background:#2e7d32;
+    color:white;
+    font-weight:600;
+}
+
+button.save-btn:hover{
+    background: #1b5e20;
+}
+
+.items-list{
+    font-size: 13px;
+    color: #444;
+    line-height: 1.4;
+}
+
+.empty-orders{
+    text-align: center;
+    padding: 40px;
+    color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2><a href="/admin/dashboard">📦 Admin - Manage Orders</a></h2>
+    <a href="/admin/dashboard" class="back-btn">⬅️ Back to Dashboard</a>
+</header>
+
+<div class="container">
+
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Delivery Address & Contact</th>
+                    <th>Ordered Books</th>
+                    <th>Total Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="orderTable"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+async function loadOrders(){
+    const table = document.getElementById("orderTable");
+    table.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 30px;">Loading orders...</td></tr>`;
+
+    let serverOrders = [];
+    try {
+        const res = await fetch("/api/orders");
+        if (res.ok) {
+            serverOrders = await res.json();
+        }
+    } catch (err) {
+        console.warn("Could not fetch server orders:", err);
+    }
+
+    const localOrders = JSON.parse(localStorage.getItem("bookstoreOrderHistory")) || [];
+    const orderMap = new Map();
+
+    if (Array.isArray(serverOrders)) {
+        serverOrders.forEach(o => {
+            const key = o._id || o.id;
+            if (key) orderMap.set(key, o);
+        });
+    }
+
+    if (Array.isArray(localOrders)) {
+        localOrders.forEach(o => {
+            const key = o._id || o.id || o.orderId;
+            if (key && !orderMap.has(key)) orderMap.set(key, o);
+        });
+    }
+
+    const allOrders = Array.from(orderMap.values());
+
+    if (allOrders.length === 0) {
+        table.innerHTML = `<tr><td colspan="8" class="empty-orders">No orders found in database.</td></tr>`;
+        return;
+    }
+
+    table.innerHTML = "";
+
+    allOrders.forEach(order => {
+        const id = order._id || order.id || order.orderId || "N/A";
+        const displayId = id.startsWith("#") ? id : `#ORD-${id.substring(Math.max(0, id.length - 8)).toUpperCase()}`;
+        const name = order.customerName || "Guest Customer";
+        const email = order.customerEmail || "";
+
+        const addrObj = order.deliveryAddress || {};
+        let addressText = addrObj.fullAddress || "";
+        if (!addressText && (addrObj.street || addrObj.city)) {
+            addressText = [addrObj.street, addrObj.city, addrObj.state, addrObj.zipCode].filter(Boolean).join(", ");
+        }
+        if (!addressText && order.address) {
+            addressText = order.address;
+        }
+        const phoneText = addrObj.phone || order.phone || "N/A";
+        
+        let itemsHtml = "";
+        if (Array.isArray(order.items) && order.items.length > 0) {
+            itemsHtml = order.items.map(i => `• ${escapeHtml(i.title)} (×${i.quantity || 1})`).join("<br>");
+        } else if (order.bookTitle) {
+            itemsHtml = `• ${escapeHtml(order.bookTitle)} (×${order.quantity || 1})`;
+        } else {
+            itemsHtml = "No item details";
+        }
+
+        let total = 0;
+        if (typeof order.totalAmount === 'number') total = order.totalAmount;
+        else if (typeof order.total === 'number') total = order.total;
+        else if (Array.isArray(order.items)) {
+            total = order.items.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+        }
+
+        const dateStr = new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'short', year: 'numeric'
+        });
+
+        const status = order.status || "Pending";
+
+        table.innerHTML += `
+            <tr>
+                <td><strong>${displayId}</strong></td>
+                <td>${escapeHtml(name)}<br><small style="color: #666;">${escapeHtml(email)}</small></td>
+                <td>
+                    <div style="font-size: 13px; color: #1e293b;">
+                        ${addressText ? `📍 ${escapeHtml(addressText)}` : '<span style="color: #94a3b8;">No address specified</span>'}<br>
+                        📞 <small style="color: #475569;">${escapeHtml(phoneText)}</small>
+                    </div>
+                </td>
+                <td class="items-list">${itemsHtml}</td>
+                <td><strong>₹${Number(total).toFixed(2)}</strong></td>
+                <td>${dateStr}</td>
+                <td>
+                    <select id="status-${id}">
+                        <option value="Pending" ${status === "Pending" ? "selected" : ""}>Pending</option>
+                        <option value="Processing" ${status === "Processing" ? "selected" : ""}>Processing</option>
+                        <option value="Shipped" ${status === "Shipped" ? "selected" : ""}>Shipped</option>
+                        <option value="Delivered" ${status === "Delivered" ? "selected" : ""}>Delivered</option>
+                        <option value="Cancelled" ${status === "Cancelled" ? "selected" : ""}>Cancelled</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="save-btn" onclick="updateStatus('${id}')">Save</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+async function updateStatus(id){
+    const selectElem = document.getElementById("status-" + id);
+    if (!selectElem) return;
+    const status = selectElem.value;
+
+    try {
+        if (!id.startsWith("ORD-LOCAL")) {
+            await fetch("/api/orders/" + id, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status })
+            });
+        }
+    } catch (e) {
+        console.warn("Server update failed:", e);
+    }
+
+    // Update local storage history if present
+    const localOrders = JSON.parse(localStorage.getItem("bookstoreOrderHistory")) || [];
+    const index = localOrders.findIndex(o => (o._id === id || o.id === id || o.orderId === id));
+    if (index !== -1) {
+        localOrders[index].status = status;
+        localStorage.setItem("bookstoreOrderHistory", JSON.stringify(localOrders));
+    }
+
+    alert("Order status updated successfully!");
+    loadOrders();
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+loadOrders();
+</script>
+
+</body>
+</html>

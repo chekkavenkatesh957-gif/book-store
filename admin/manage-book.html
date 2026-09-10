@@ -114,12 +114,12 @@ table.innerHTML += `
 
 <td>
 <button class="edit"
-onclick="editBook('${book._id}')">
+onclick="editBook('${book._id || book.id}')">
 Edit
 </button>
 
 <button class="delete"
-onclick="deleteBook('${book._id}')">
+onclick="deleteBook('${book._id || book.id}')">
 Delete
 </button>
 </td>

@@ -153,8 +153,7 @@ async function addBooks() {
     ];
 
     const result = await Book.insertMany(books);
-    console.log(`${result.length} books added successfully!`);
-    console.log(result);
+    console.log(`✅ Successfully added ${result.length} books to the database!`);
     
     // Disconnect from MongoDB
     await mongoose.disconnect();

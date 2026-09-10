@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Order = require("../models/Order");
+const Order = require("../models/order");
 
 // Get all orders
 router.get("/", async (req, res) => {
@@ -27,11 +27,21 @@ router.get("/user/:email", async (req, res) => {
 // Place a new order
 router.post("/", async (req, res) => {
   try {
+    const deliveryAddress = req.body.deliveryAddress || {
+      street: req.body.street || "",
+      city: req.body.city || "",
+      state: req.body.state || "",
+      zipCode: req.body.zipCode || "",
+      phone: req.body.phone || "",
+      fullAddress: req.body.fullAddress || ""
+    };
+
     const order = new Order({
       customerName: req.body.customerName,
       customerEmail: req.body.customerEmail,
       items: req.body.items,
       totalAmount: req.body.totalAmount,
+      deliveryAddress: deliveryAddress,
       status: "Pending"
     });
 

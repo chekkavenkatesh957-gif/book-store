@@ -136,8 +136,10 @@ button.save-btn:hover{
                 <tr>
                     <th>Order ID</th>
                     <th>Customer</th>
+                    <th>Delivery Address & Contact</th>
                     <th>Ordered Books</th>
                     <th>Total Amount</th>
+                    <th>Payment</th>
                     <th>Date</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -152,7 +154,7 @@ button.save-btn:hover{
 <script>
 async function loadOrders(){
     const table = document.getElementById("orderTable");
-    table.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 30px;">Loading orders...</td></tr>`;
+    table.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 30px;">Loading orders...</td></tr>`;
 
     let serverOrders = [];
     try {
@@ -184,7 +186,7 @@ async function loadOrders(){
     const allOrders = Array.from(orderMap.values());
 
     if (allOrders.length === 0) {
-        table.innerHTML = `<tr><td colspan="7" class="empty-orders">No orders found in database.</td></tr>`;
+        table.innerHTML = `<tr><td colspan="8" class="empty-orders">No orders found in database.</td></tr>`;
         return;
     }
 
@@ -195,6 +197,16 @@ async function loadOrders(){
         const displayId = id.startsWith("#") ? id : `#ORD-${id.substring(Math.max(0, id.length - 8)).toUpperCase()}`;
         const name = order.customerName || "Guest Customer";
         const email = order.customerEmail || "";
+
+        const addrObj = order.deliveryAddress || {};
+        let addressText = addrObj.fullAddress || "";
+        if (!addressText && (addrObj.street || addrObj.city)) {
+            addressText = [addrObj.street, addrObj.city, addrObj.state, addrObj.zipCode].filter(Boolean).join(", ");
+        }
+        if (!addressText && order.address) {
+            addressText = order.address;
+        }
+        const phoneText = addrObj.phone || order.phone || "N/A";
         
         let itemsHtml = "";
         if (Array.isArray(order.items) && order.items.length > 0) {
@@ -222,8 +234,15 @@ async function loadOrders(){
             <tr>
                 <td><strong>${displayId}</strong></td>
                 <td>${escapeHtml(name)}<br><small style="color: #666;">${escapeHtml(email)}</small></td>
+                <td>
+                    <div style="font-size: 13px; color: #1e293b;">
+                        ${addressText ? `📍 ${escapeHtml(addressText)}` : '<span style="color: #94a3b8;">No address specified</span>'}<br>
+                        📞 <small style="color: #475569;">${escapeHtml(phoneText)}</small>
+                    </div>
+                </td>
                 <td class="items-list">${itemsHtml}</td>
                 <td><strong>₹${Number(total).toFixed(2)}</strong></td>
+                <td><span style="font-size:12px;background:#f1f5f9;padding:3px 8px;border-radius:12px;font-weight:600;color:#334155;">${escapeHtml(order.paymentMethod || 'N/A')}</span></td>
                 <td>${dateStr}</td>
                 <td>
                     <select id="status-${id}">
