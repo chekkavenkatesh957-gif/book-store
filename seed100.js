@@ -1,6 +1,5 @@
-const mongoose = require("mongoose");
+const { MongoClient } = require("mongodb");
 require("dotenv").config();
-const Book = require("./models/book");
 
 const books = [
   // Programming
@@ -129,19 +128,21 @@ const books = [
 ];
 
 async function seed() {
+  const client = new MongoClient(process.env.MONGO_URI);
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
-    });
-    console.log("✅ MongoDB Connected");
+    await client.connect();
+    console.log("✅ MongoDB Atlas Connected");
 
-    const result = await Book.insertMany(books);
-    console.log(`✅ Successfully added ${result.length} new books!`);
+    const db = client.db("bookstore");
+    const collection = db.collection("books");
 
-    const total = await Book.countDocuments();
+    const result = await collection.insertMany(books);
+    console.log(`✅ Successfully added ${result.insertedCount} new books!`);
+
+    const total = await collection.countDocuments();
     console.log(`📚 Total books in database: ${total}`);
 
-    await mongoose.disconnect();
+    await client.close();
     process.exit(0);
   } catch (err) {
     console.error("❌ Error:", err.message);

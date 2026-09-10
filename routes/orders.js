@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const Order = require("../models/order");
+const { orders, ObjectId } = require("../models/order");
 
 // Get all orders
 router.get("/", async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
-    res.json(orders);
+    const allOrders = await orders().find({}).sort({ createdAt: -1 }).toArray();
+    res.json(allOrders);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -15,10 +15,11 @@ router.get("/", async (req, res) => {
 // Get orders for a specific user email
 router.get("/user/:email", async (req, res) => {
   try {
-    const orders = await Order.find({ 
-      customerEmail: { $regex: new RegExp(`^${req.params.email}$`, "i") } 
-    }).sort({ createdAt: -1 });
-    res.json(orders);
+    const userOrders = await orders()
+      .find({ customerEmail: { $regex: new RegExp(`^${req.params.email}$`, "i") } })
+      .sort({ createdAt: -1 })
+      .toArray();
+    res.json(userOrders);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -36,17 +37,20 @@ router.post("/", async (req, res) => {
       fullAddress: req.body.fullAddress || ""
     };
 
-    const order = new Order({
+    const newOrder = {
       customerName: req.body.customerName,
       customerEmail: req.body.customerEmail,
       items: req.body.items,
       totalAmount: req.body.totalAmount,
-      deliveryAddress: deliveryAddress,
-      status: "Pending"
-    });
+      deliveryAddress,
+      status: "Pending",
+      paymentMethod: req.body.paymentMethod || "Cash on Delivery",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
 
-    const savedOrder = await order.save();
-    res.status(201).json(savedOrder);
+    const result = await orders().insertOne(newOrder);
+    res.status(201).json({ _id: result.insertedId, ...newOrder });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -55,13 +59,12 @@ router.post("/", async (req, res) => {
 // Update order status
 router.put("/:id", async (req, res) => {
   try {
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
+    const result = await orders().findOneAndUpdate(
+      { _id: new ObjectId(req.params.id) },
+      { $set: { status: req.body.status, updatedAt: new Date() } },
+      { returnDocument: "after" }
     );
-
-    res.json(order);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -70,7 +73,7 @@ router.put("/:id", async (req, res) => {
 // Delete order
 router.delete("/:id", async (req, res) => {
   try {
-    await Order.findByIdAndDelete(req.params.id);
+    await orders().deleteOne({ _id: new ObjectId(req.params.id) });
     res.json({ message: "Order deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
