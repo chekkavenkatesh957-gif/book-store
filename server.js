@@ -18,6 +18,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ Connect to MongoDB Atlas on every request (Vercel serverless safe)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("❌ DB Connection failed:", err.message);
+    res.status(500).json({ message: "Database connection failed. Please try again." });
+  }
+});
+
+
 // ========================
 // Static Files
 // ========================
@@ -134,19 +146,14 @@ app.use((req, res) => {
 });
 
 // ========================
-// Start Server
+// Start Server (Local only)
 // ========================
 const PORT = process.env.PORT || 5045;
 
-connectDB()
-  .then(() => {
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`✅ Server running at http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ Failed to connect to MongoDB Atlas:", err.message);
-    process.exit(1);
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ Server running at http://localhost:${PORT}`);
   });
+}
 
 module.exports = app;

@@ -1,12 +1,16 @@
 const { MongoClient, ObjectId } = require("mongodb");
 
+// Cache connection for serverless reuse
+let client;
 let db;
 
 async function connectDB() {
+  if (db) return db; // ✅ Reuse existing connection (serverless caching)
+
   const uri = process.env.MONGO_URI;
   if (!uri) throw new Error("MONGO_URI is not defined in environment variables");
 
-  const client = new MongoClient(uri);
+  client = new MongoClient(uri);
   await client.connect();
   db = client.db("bookstore");
   console.log("✅ MongoDB Atlas Connected");
