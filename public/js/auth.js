@@ -83,33 +83,40 @@ function showUserProfileModal() {
         document.body.appendChild(modal);
     }
 
+    const getUpdates = user.getUpdates !== false;
     modal.innerHTML = `
-        <div style="background: white; border-radius: 12px; width: 90%; max-width: 420px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; font-family: Arial, sans-serif;">
-            <button onclick="closeUserProfileModal()" style="position: absolute; top: 12px; right: 15px; border: none; background: transparent; font-size: 22px; cursor: pointer; color: #888;">&times;</button>
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="font-size: 48px; margin-bottom: 10px;">👤</div>
-                <h2 style="color: #0d47a1; margin: 0; font-size: 22px;">My Account Details</h2>
-                <span style="display: inline-block; background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-top: 5px;">Active Session</span>
+        <div style="background: linear-gradient(145deg, #0f172a, #1e293b); border-radius: 20px; width: 90%; max-width: 440px; padding: 30px; box-shadow: 0 32px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08); position: relative; font-family: 'Outfit', Arial, sans-serif; border: 1px solid rgba(255,255,255,0.08);">
+            <button onclick="closeUserProfileModal()" style="position: absolute; top: 16px; right: 16px; border: none; background: rgba(255,255,255,0.06); width:32px; height:32px; border-radius:50%; font-size: 18px; cursor: pointer; color: rgba(255,255,255,0.5); display:flex; align-items:center; justify-content:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">&times;</button>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="width:70px;height:70px;margin:0 auto 14px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 10px 28px rgba(37,99,235,0.4);">👤</div>
+                <h2 style="color: #fff; margin: 0; font-size: 22px; font-weight: 800;">My Account</h2>
+                <span style="display: inline-block; background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 8px; border: 1px solid rgba(16,185,129,0.25);">● Active Session</span>
             </div>
-            
-            <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
-                <div style="margin-bottom: 10px; font-size: 14px;">
-                    <strong style="color: #555; display: block; font-size: 12px; text-transform: uppercase;">Full Name</strong>
-                    <span style="color: #111; font-size: 16px; font-weight: bold;">${escapeHtml(user.name)}</span>
+
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 20px; display:flex; flex-direction:column; gap:14px;">
+                <div>
+                    <div style="color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">Full Name</div>
+                    <div style="color: #fff; font-size: 16px; font-weight: 700;">👤 ${escapeHtml(user.name)}</div>
                 </div>
-                <div style="margin-bottom: 10px; font-size: 14px;">
-                    <strong style="color: #555; display: block; font-size: 12px; text-transform: uppercase;">Email Address</strong>
-                    <span style="color: #111; font-size: 15px;">${escapeHtml(user.email)}</span>
+                <div style="border-top:1px solid rgba(255,255,255,0.07); padding-top:14px;">
+                    <div style="color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">Email Address</div>
+                    <div style="color: #93c5fd; font-size: 15px;">📧 ${escapeHtml(user.email)}</div>
                 </div>
-                <div style="font-size: 14px;">
-                    <strong style="color: #555; display: block; font-size: 12px; text-transform: uppercase;">Account Type</strong>
-                    <span style="color: #0d47a1; font-size: 14px; font-weight: bold;">Registered Book Store Customer</span>
+                <div style="border-top:1px solid rgba(255,255,255,0.07); padding-top:14px;">
+                    <div style="color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">Account Type</div>
+                    <div style="color: #a5b4fc; font-size: 14px; font-weight: 700;">📚 Registered Customer</div>
+                </div>
+                <div style="border-top:1px solid rgba(255,255,255,0.07); padding-top:14px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">Get Updates &amp; Offers</div>
+                        <div style="color:${getUpdates ? '#34d399' : 'rgba(255,255,255,0.35)'}; font-size: 14px; font-weight: 600;">${getUpdates ? '🔔 Subscribed' : '🔕 Not subscribed'}</div>
+                    </div>
                 </div>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <a href="/orders" style="display: block; text-align: center; background: #0d47a1; color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold;">📜 View Order History</a>
-                <button onclick="logoutUser()" style="width: 100%; background: #dc3545; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;">🚪 Logout of Account</button>
+                <a href="/orders" style="display: block; text-align: center; background: linear-gradient(135deg,#2563eb,#1d4ed8); color: white; text-decoration: none; padding: 13px; border-radius: 10px; font-weight: 700; font-size: 15px; box-shadow: 0 6px 18px rgba(37,99,235,0.35);">📜 My Order History</a>
+                <button onclick="logoutUser()" style="width: 100%; background: linear-gradient(135deg,#ef4444,#dc2626); color: white; border: none; padding: 13px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 6px 18px rgba(239,68,68,0.3);">🚪 Logout</button>
             </div>
         </div>
     `;

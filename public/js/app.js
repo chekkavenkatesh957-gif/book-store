@@ -132,6 +132,102 @@ function applyFilters() {
     displayBooks(filteredBooks);
 }
 
+/* Category-based gradient colours for placeholder covers */
+const CAT_GRADIENTS = {
+    'programming':  ['#1e40af','#3b82f6'],
+    'web':          ['#0e7490','#22d3ee'],
+    'backend':      ['#065f46','#10b981'],
+    'database':     ['#7c2d12','#f97316'],
+    'ai & ml':      ['#4c1d95','#a78bfa'],
+    'devops':       ['#1e3a5f','#60a5fa'],
+    'cloud':        ['#0369a1','#38bdf8'],
+    'security':     ['#7f1d1d','#f87171'],
+    'default':      ['#1e293b','#64748b'],
+};
+
+function getCatGradient(cat) {
+    const key = (cat || '').toLowerCase();
+    for (const [k, v] of Object.entries(CAT_GRADIENTS)) {
+        if (key.includes(k)) return v;
+    }
+    return CAT_GRADIENTS.default;
+}
+
+function bookCoverHTML(book) {
+    const imgSrc = resolveBookImage(book.image);
+    const [c1, c2] = getCatGradient(book.category);
+    const initials = (book.title || '?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+    if (book.image) {
+        // Real image from DB
+        return `
+            <div class="book-cover-wrapper">
+                <img class="book-cover"
+                     src="${imgSrc}"
+                     alt="${escapeHtml(book.title)}"
+                     loading="lazy"
+                     onerror="this.parentElement.innerHTML=generateFallbackCover('${escapeHtml(book.title)}','${escapeHtml(book.category||'')}','${c1}','${c2}')">
+            </div>`;
+    }
+    // Stylish placeholder cover
+    return `
+        <div class="book-cover-wrapper" style="background:linear-gradient(145deg,${c1},${c2});">
+            <div class="book-cover-placeholder">
+                <div class="bcp-spine"></div>
+                <div class="bcp-content">
+                    <div class="bcp-initials">${initials}</div>
+                    <div class="bcp-title">${escapeHtml(book.title)}</div>
+                    <div class="bcp-author">${escapeHtml(book.author||'')}</div>
+                </div>
+            </div>
+        </div>`;
+}
+
+function generateFallbackCover(title, category, c1, c2) {
+    const initials = title.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    return `<div class="book-cover-wrapper" style="background:linear-gradient(145deg,${c1},${c2});"><div class="book-cover-placeholder"><div class="bcp-spine"></div><div class="bcp-content"><div class="bcp-initials">${initials}</div><div class="bcp-title">${title}</div></div></div></div>`;
+}
+
+/* Inject placeholder cover styles once */
+(function injectCoverStyles() {
+    if (document.getElementById('_bcp_styles')) return;
+    const s = document.createElement('style');
+    s.id = '_bcp_styles';
+    s.textContent = `
+        .book-cover-placeholder {
+            width:100%; height:100%; position:relative;
+            display:flex; align-items:center; justify-content:center;
+            border-radius:12px; overflow:hidden;
+        }
+        .bcp-spine {
+            position:absolute; left:0; top:0; width:14px; height:100%;
+            background:rgba(0,0,0,0.25); border-right:2px solid rgba(255,255,255,0.12);
+        }
+        .bcp-content {
+            text-align:center; padding:16px 20px 16px 30px;
+            display:flex; flex-direction:column; align-items:center; gap:10px;
+        }
+        .bcp-initials {
+            width:58px; height:58px; border-radius:50%;
+            background:rgba(255,255,255,0.18); border:2px solid rgba(255,255,255,0.35);
+            display:flex; align-items:center; justify-content:center;
+            font-size:22px; font-weight:900; color:#fff;
+            text-shadow:0 2px 8px rgba(0,0,0,0.3);
+        }
+        .bcp-title {
+            color:#fff; font-size:13px; font-weight:700; line-height:1.4;
+            text-shadow:0 2px 6px rgba(0,0,0,0.4); max-width:160px;
+        }
+        .bcp-author {
+            color:rgba(255,255,255,0.65); font-size:11px; font-weight:500;
+            max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .book-cover-wrapper { transition: box-shadow 0.3s ease; }
+        .book-card:hover .book-cover-wrapper { box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+    `;
+    document.head.appendChild(s);
+})();
+
 function displayBooks(books) {
     const booksList = document.getElementById("booksList");
     if (!booksList) return;
@@ -142,8 +238,10 @@ function displayBooks(books) {
     }
 
     booksList.innerHTML = books.map(book => {
+        const imgArg = escapeHtml(book.image || '');
         return `
         <div class="book-card">
+            ${bookCoverHTML(book)}
             <div>
                 <h3>${escapeHtml(book.title)}</h3>
                 <span class="author">By ${escapeHtml(book.author || "Unknown")}</span>
@@ -151,7 +249,7 @@ function displayBooks(books) {
                 <p class="price">₹${book.price}</p>
             </div>
             <div class="book-actions">
-                <button class="btn-small btn-cart" onclick="addToCart('${book._id || book.id}', '${escapeHtml(book.title)}', ${book.price}, '${escapeHtml(book.author || '')}')">🛒 Add to Cart</button>
+                <button class="btn-small btn-cart" onclick="addToCart('${book._id || book.id}', '${escapeHtml(book.title)}', ${book.price}, '${escapeHtml(book.author || '')}', '${imgArg}')">🛒 Add to Cart</button>
             </div>
         </div>
         `;

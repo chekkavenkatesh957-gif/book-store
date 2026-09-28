@@ -3,115 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact Us - Book Store</title>
-
+<title>Contact Us – Online Book Store</title>
+<meta name="description" content="Get in touch with Online Book Store. We'd love to hear from you — send us a message!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
-.contact-container{
-    width:90%;
-    max-width:600px;
-    background:white;
-    margin:40px auto;
-    padding:30px;
-    border-radius:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.08);
-    border: 1px solid #e2e8f0;
+.contact-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #0f172a 100%);
+    color: white; text-align: center; padding: 50px 20px 60px;
+    position: relative; overflow: hidden;
 }
-.contact-container h2{
-    text-align:center;
-    color:#0f172a;
-    margin-bottom:20px;
+.contact-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 60% 50%, rgba(99,102,241,0.18) 0%, transparent 65%),
+                radial-gradient(circle at 25% 30%, rgba(16,185,129,0.12) 0%, transparent 50%);
 }
-.contact-container input, .contact-container textarea{
-    width:100%;
-    padding:14px;
-    margin:10px 0;
-    border:2px solid #e2e8f0;
-    border-radius:10px;
-    font-size:15px;
-    outline: none;
-    transition: all 0.2s ease;
+.contact-hero h2 { font-size: 36px; font-weight: 800; margin-bottom: 10px; position:relative; }
+.contact-hero p { font-size: 16px; color: rgba(255,255,255,0.75); position:relative; }
+
+.contact-wrap {
+    width: 92%; max-width: 900px; margin: -30px auto 50px;
+    display: grid; grid-template-columns: 1fr 340px; gap: 24px; position: relative; z-index: 1;
 }
-.contact-container input:focus, .contact-container textarea:focus{
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+
+/* Form card */
+.contact-card {
+    background: #fff; border-radius: 20px; padding: 36px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;
 }
-.contact-container button{
-    width:100%;
-    padding:14px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color:white;
-    border:none;
-    border-radius:10px;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-    box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+.contact-card h3 { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; }
+
+.cfield { margin-bottom: 18px; }
+.cfield label {
+    display: block; font-size: 12px; font-weight: 700; letter-spacing: 0.7px;
+    text-transform: uppercase; color: #64748b; margin-bottom: 7px;
+}
+.cfield input, .cfield textarea {
+    width: 100%; padding: 13px 16px; border: 2px solid #e2e8f0; border-radius: 12px;
+    font-size: 15px; font-family: 'Outfit', sans-serif; outline: none;
+    transition: all 0.25s ease; box-sizing: border-box; color: #0f172a;
+    background: #f8fafc;
+}
+.cfield input:focus, .cfield textarea:focus {
+    border-color: #2563eb; background: #fff;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+.cfield textarea { resize: vertical; min-height: 120px; }
+
+.cfrow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.btn-send {
+    width: 100%; padding: 14px; background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: white; border: none; border-radius: 12px; font-size: 16px;
+    font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif;
+    box-shadow: 0 8px 24px rgba(37,99,235,0.3); transition: all 0.25s ease; margin-top: 6px;
+}
+.btn-send:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(37,99,235,0.45); }
+
+/* Info card */
+.info-card {
+    background: linear-gradient(145deg, #0f172a, #1e293b);
+    border-radius: 20px; padding: 36px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2); color: white;
+    display: flex; flex-direction: column; gap: 24px;
+}
+.info-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.info-card .i-sub { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 10px; }
+
+.info-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px; background: rgba(255,255,255,0.05); border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08); transition: all 0.25s ease;
+}
+.info-item:hover { background: rgba(255,255,255,0.09); }
+.info-icon {
+    width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.info-icon.blue  { background: rgba(37,99,235,0.2); }
+.info-icon.green { background: rgba(16,185,129,0.2); }
+.info-icon.amber { background: rgba(245,158,11,0.2); }
+.info-label { font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 4px; }
+.info-val { font-size: 14px; font-weight: 600; color: #e2e8f0; word-break: break-all; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .contact-wrap { grid-template-columns: 1fr; }
+    .cfrow { grid-template-columns: 1fr; }
+    .contact-hero h2 { font-size: 26px; }
 }
 </style>
 </head>
-
 <body>
 
 <header>
-<h1><a href="/">📚 Online Book Store</a></h1>
-<nav>
-<a href="/">Home</a>
-<a href="/contact" class="active">Contact</a>
-<a href="/cart">Cart</a>
-<a href="/orders">Order History</a>
-<span id="navAuth">
-    <a href="/login">Login</a>
-    <a href="/signup">Sign Up</a>
-</span>
-</nav>
+    <h1><a href="/">📚 Online Book Store</a></h1>
+    <nav>
+        <a href="/">🏠 Home</a>
+        <a href="/contact" class="active">✉️ Contact</a>
+        <a href="/cart">🛒 Cart</a>
+        <a href="/orders">📦 Orders</a>
+        <span id="navAuth">
+            <a href="/login">🔐 Login</a>
+            <a href="/signup">🚀 Sign Up</a>
+        </span>
+    </nav>
 </header>
 
-<div class="container contact-container">
-
-<h2>Send Us a Message</h2>
-
-<form id="contactForm">
-
-<input
-type="text"
-id="name"
-placeholder="Your Full Name"
-required>
-
-<input
-type="email"
-id="email"
-placeholder="Your Email Address"
-required>
-
-<input
-type="text"
-id="subject"
-placeholder="Subject"
-required>
-
-<textarea
-id="message"
-rows="6"
-placeholder="Write your message..."
-required></textarea>
-
-<button type="submit">Send Message</button>
-
-</form>
-
-<div class="contact-info" style="margin-top: 25px; text-align: center; line-height: 28px; color: #475569;">
-<h3 style="color: #0f172a; margin-bottom: 10px;">Contact Information</h3>
-<p>📍 Address: Kakinada, Andhra Pradesh, India</p>
-<p>📞 Phone: +91 6302458954</p>
-<p>📧 Email: chekkavenkatesh957@gmail.com</p>
+<div class="contact-hero">
+    <h2>✉️ Contact Us</h2>
+    <p>Have a question, suggestion or need help? We'd love to hear from you!</p>
 </div>
+
+<div class="contact-wrap">
+
+    <!-- Form -->
+    <div class="contact-card">
+        <h3>💬 Send Us a Message</h3>
+        <form id="contactForm">
+            <div class="cfrow">
+                <div class="cfield">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" placeholder="Full name" required>
+                </div>
+                <div class="cfield">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="you@example.com" required>
+                </div>
+            </div>
+            <div class="cfield">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" placeholder="How can we help?" required>
+            </div>
+            <div class="cfield">
+                <label for="message">Message</label>
+                <textarea id="message" rows="5" placeholder="Write your message here..." required></textarea>
+            </div>
+            <button type="submit" id="sendBtn" class="btn-send">📨 Send Message</button>
+        </form>
+    </div>
+
+    <!-- Info -->
+    <div class="info-card">
+        <div>
+            <h3>📍 Find Us</h3>
+            <p class="i-sub">We're here to help you Monday–Saturday</p>
+        </div>
+
+        <div class="info-item">
+            <div class="info-icon blue">📍</div>
+            <div>
+                <div class="info-label">Address</div>
+                <div class="info-val">Kakinada, Andhra Pradesh, India</div>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-icon amber">📧</div>
+            <div>
+                <div class="info-label">Email</div>
+                <div class="info-val">chekkavenkatesh957@gmail.com</div>
+            </div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-icon green">🕐</div>
+            <div>
+                <div class="info-label">Business Hours</div>
+                <div class="info-val">Mon – Sat, 9 AM – 6 PM IST</div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
 <footer>
-<p>&copy; 2026 Book Store. All Rights Reserved.</p>
+    <p>© 2026 Online Book Store. All Rights Reserved.</p>
 </footer>
 
 <script src="/js/auth.js"></script>
@@ -120,18 +188,39 @@ required></textarea>
 document.addEventListener("DOMContentLoaded", () => {
     const user = getCurrentUser();
     if (user) {
-        if (user.name) document.getElementById("name").value = user.name;
+        if (user.name)  document.getElementById("name").value  = user.name;
         if (user.email) document.getElementById("email").value = user.email;
     }
 });
 
-document.getElementById("contactForm").addEventListener("submit",function(e){
-e.preventDefault();
+document.getElementById("contactForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const btn = document.getElementById("sendBtn");
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Sending...";
 
-alert("Thank you! Your message has been sent successfully.");
-
-document.getElementById("contactForm").reset();
+    setTimeout(() => {
+        showToast("✅ Message sent! We'll get back to you soon.");
+        document.getElementById("contactForm").reset();
+        btn.disabled = false;
+        btn.innerHTML = "📨 Send Message";
+    }, 900);
 });
+
+function showToast(message) {
+    const t = document.createElement('div');
+    t.style.cssText = `
+        position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px);
+        background:linear-gradient(135deg,#10b981,#059669); color:#fff;
+        padding:14px 28px; border-radius:14px; font-size:15px; font-weight:600;
+        box-shadow:0 8px 32px rgba(0,0,0,0.25); z-index:9999; font-family:'Outfit',sans-serif;
+        transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1); opacity:0;
+    `;
+    t.textContent = message;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => { t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+    setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; setTimeout(()=>t.remove(),350); }, 4000);
+}
 </script>
 
 </body>
