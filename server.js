@@ -285,28 +285,28 @@ app.get(["/orders", "/orders.html", "/order-history"], (req, res) => {
 // ========================
 // Admin Pages
 // ========================
-app.get(["/admin", "/admin/dashboard", "/admin/dashboard.html"], (req, res) => {
+app.get(["/admin", "/admin/dashboard", "/admin/dashboard.html", "/admin-dashboard"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "admin-dashboard.html"));
 });
-app.get(["/admin/login", "/admin/login.html"], (req, res) => {
+app.get(["/admin/login", "/admin/login.html", "/admin-login"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "admin-login.html"));
 });
-app.get(["/admin/signup", "/admin/signup.html"], (req, res) => {
+app.get(["/admin/signup", "/admin/signup.html", "/admin-signup"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "admin-signup.html"));
 });
-app.get(["/admin/add-book", "/admin/add-book.html"], (req, res) => {
+app.get(["/admin/add-book", "/admin/add-book.html", "/add-book", "/add-book.html"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "add-book.html"));
 });
-app.get(["/admin/edit-book", "/admin/edit-book.html"], (req, res) => {
+app.get(["/admin/edit-book", "/admin/edit-book.html", "/edit-book", "/edit-book.html"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "edit-book.html"));
 });
-app.get(["/admin/manage-book", "/admin/manage-book.html"], (req, res) => {
+app.get(["/admin/manage-book", "/admin/manage-book.html", "/manage-book", "/manage-book.html", "/manage-books"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "manage-book.html"));
 });
-app.get(["/admin/manage-user", "/admin/manage-user.html"], (req, res) => {
+app.get(["/admin/manage-user", "/admin/manage-user.html", "/manage-user", "/manage-user.html", "/manage-users"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "manage-user.html"));
 });
-app.get(["/admin/orders", "/admin/orders.html"], (req, res) => {
+app.get(["/admin/orders", "/admin/orders.html", "/admin/order", "/admin/order.html", "/manage-orders"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "order.html"));
 });
 

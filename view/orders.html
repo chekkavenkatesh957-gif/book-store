@@ -3,611 +3,526 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin - Manage Orders & UTR Verification</title>
-
+<title>My Orders – Venky's BookStore</title>
+<meta name="description" content="Track your orders, payment verification and delivery status at Venky's BookStore.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-body { background: #f4f6f9; min-height: 100vh; display: flex; flex-direction: column; color: #1e293b; }
-header { background: #0f172a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-header h1 a { color: white; text-decoration: none; font-size: 22px; font-weight: 700; }
-nav a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 15px; font-weight: 500; font-size: 14px; transition: color 0.2s; }
-nav a:hover, nav a.active { color: white; font-weight: 700; }
-.container { width: 95%; max-width: 1400px; margin: 25px auto; flex: 1; }
+* { box-sizing: border-box; }
+body { background: #f8fafc; color: #1e293b; font-family: 'Outfit', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+.container { width: 92%; max-width: 1050px; margin: 24px auto; flex: 1; }
 
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-.page-header h2 { color: #0f172a; font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.page-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+.page-title h2 { color: #0f172a; font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 10px; margin: 0; }
+.user-badge { background: #e0f2fe; color: #0369a1; padding: 7px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; border: 1px solid #bae6fd; }
 
-/* Stat Cards */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 22px; }
-.stat-card { background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-.stat-card.alert { border-left: 5px solid #f59e0b; background: #fffbeb; }
-.stat-info h4 { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.stat-info .num { font-size: 26px; font-weight: 800; color: #0f172a; }
-.stat-card.alert .num { color: #b45309; }
-.stat-icon { font-size: 28px; }
+.filter-bar { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+.search-input { flex: 1; min-width: 250px; padding: 12px 18px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: white; font-family: inherit; transition: border-color 0.2s; }
+.search-input:focus { border-color: #2563eb; }
+.status-filter { padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: white; outline: none; cursor: pointer; font-weight: 600; color: #334155; font-family: inherit; }
+.btn-refresh-history { background: #0f172a; color: white; border: none; padding: 0 18px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: inherit; }
+.btn-refresh-history:hover { background: #1e293b; }
 
-/* Filter Tabs */
-.filter-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.tab-btn { background: white; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: #475569; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-.tab-btn:hover { background: #f1f5f9; color: #0f172a; }
-.tab-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
-.tab-count { background: rgba(0,0,0,0.08); padding: 2px 7px; border-radius: 10px; font-size: 11px; }
-.tab-btn.active .tab-count { background: rgba(255,255,255,0.25); color: white; }
+/* Order Card */
+.order-card { background: white; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 22px; overflow: hidden; border: 1px solid #e2e8f0; transition: transform 0.2s; }
+.order-card:hover { border-color: #cbd5e1; }
+.order-header { background: #f8fafc; padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; }
+.order-id { font-weight: 800; color: #0f172a; font-size: 15px; font-family: monospace; }
 
-/* Search & Actions Bar */
-.search-bar-wrap { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-.search-input { flex: 1; min-width: 280px; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; background: white; transition: border-color 0.2s; }
-.search-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
-.refresh-btn { background: #0f172a; color: white; border: none; padding: 0 20px; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-.refresh-btn:hover { background: #1e293b; }
-
-/* Order Table */
-.order-table-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; border: 1px solid #e2e8f0; }
-table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-th, td { padding: 14px 16px; text-align: left; vertical-align: top; }
-th { background: #0f172a; color: white; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
-tr:nth-child(even) { background-color: #f8fafc; }
-tr:hover { background-color: #f1f5f9; }
-
-/* Badge Styles */
-.badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
 .badge-pending { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
 .badge-verified { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
 .badge-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
 .badge-cod { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
 
-.status-badge { display: inline-block; padding: 3px 10px; border-radius: 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-.status-Awaiting { background: #fef3c7; color: #b45309; }
-.status-Pending { background: #fef3c7; color: #b45309; }
-.status-Processing { background: #e0e7ff; color: #4338ca; }
-.status-Shipped { background: #e0f2fe; color: #0369a1; }
-.status-Delivered { background: #dcfce7; color: #15803d; }
-.status-Cancelled { background: #fee2e2; color: #b91c1c; }
+/* Visual Order Progress Tracker */
+.tracker-wrap { padding: 18px 22px; background: white; border-bottom: 1px solid #f1f5f9; }
+.tracker-steps { display: flex; justify-content: space-between; position: relative; max-width: 650px; margin: 0 auto; }
+.tracker-steps::before { content: ''; position: absolute; top: 14px; left: 10%; right: 10%; height: 3px; background: #e2e8f0; z-index: 1; }
+.tracker-progress-line { position: absolute; top: 14px; left: 10%; height: 3px; background: #16a34a; z-index: 2; transition: width 0.3s; }
+.step { position: relative; z-index: 3; text-align: center; width: 85px; }
+.step-dot { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; color: #64748b; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.step.active .step-dot { background: #2563eb; color: white; }
+.step.done .step-dot { background: #16a34a; color: white; }
+.step.rejected .step-dot { background: #dc2626; color: white; }
+.step-label { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+.step.active .step-label { color: #2563eb; }
+.step.done .step-label { color: #16a34a; }
+.step.rejected .step-label { color: #dc2626; }
 
-/* UTR Display Box */
-.utr-pill { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; font-family: monospace; font-size: 13px; font-weight: 700; color: #0f172a; display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; }
-.btn-copy { background: none; border: none; cursor: pointer; font-size: 12px; color: #2563eb; padding: 2px 4px; border-radius: 4px; }
-.btn-copy:hover { background: #dbeafe; }
+/* Payment & UTR Notice Box */
+.utr-banner { margin: 14px 22px; padding: 13px 18px; border-radius: 10px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.utr-banner.pending { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.utr-banner.verified { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.utr-banner.rejected { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.utr-banner.cod { background: #f0f9ff; border: 1px solid #bae6fd; color: #075985; }
 
-/* Action Buttons */
-.btn-approve { background: #16a34a; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: background 0.2s; }
-.btn-approve:hover { background: #15803d; }
-.btn-reject { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: background 0.2s; }
-.btn-reject:hover { background: #b91c1c; }
-.btn-save { background: #0f172a; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
-.btn-save:hover { background: #1e293b; }
-.btn-invoice { background: #f8fafc; border: 1px solid #cbd5e1; color: #334155; padding: 6px 10px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
-.btn-invoice:hover { background: #e2e8f0; color: #0f172a; }
-.btn-del { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; padding: 4px; border-radius: 4px; }
-.btn-del:hover { background: #fee2e2; }
+.utr-tag { font-family: monospace; font-weight: 800; background: rgba(0,0,0,0.06); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px; }
+.btn-edit-utr { background: white; border: 1px solid #cbd5e1; color: #0f172a; padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.btn-edit-utr:hover { background: #f1f5f9; }
+
+.customer-details { padding: 12px 22px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-size: 13px; color: #475569; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.order-items { padding: 16px 22px; }
+.item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; }
+.order-footer { padding: 14px 22px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; }
+.order-total { font-size: 17px; font-weight: 800; color: #0f172a; }
+
+.btn-action-group { display: flex; gap: 8px; align-items: center; }
+.btn-secondary-action { padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; background: white; color: #334155; font-family: inherit; }
+.btn-secondary-action:hover { background: #f1f5f9; color: #0f172a; }
+.btn-reorder { padding: 7px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700; background: #2563eb; color: white; font-family: inherit; }
+.btn-reorder:hover { background: #1d4ed8; }
+
+/* Guest banner */
+.guest-banner {
+    background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 12px;
+}
+.guest-banner p { margin: 0; color: #1e40af; font-size: 14px; }
+.guest-banner a {
+    background: #2563eb; color: white; padding: 8px 18px; border-radius: 8px;
+    text-decoration: none; font-weight: 700; font-size: 13px; display: inline-block;
+}
 
 /* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-.modal-card { background: white; border-radius: 14px; width: 100%; max-width: 500px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; color: #0f172a; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 15px; }
+.modal-card { background: white; border-radius: 14px; width: 100%; max-width: 520px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); font-family: inherit; }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #0f172a; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 </style>
 </head>
 
 <body>
 
 <header>
-    <h1><a href="/admin/dashboard">🛠️ Admin Dashboard</a></h1>
+    <a href="/" class="brand-logo-link">
+        <img src="/images/logo.svg" alt="Venky's BookStore Logo" class="brand-logo">
+    </a>
     <nav>
-        <a href="/admin/dashboard">Dashboard</a>
-        <a href="/admin/add-book">Add Book</a>
-        <a href="/admin/manage-book">Manage Books</a>
-        <a href="/admin/manage-user">Manage Users</a>
-        <a href="/admin/orders" class="active">Manage Orders</a>
-        <a href="/admin/login" style="background: #ef4444; padding: 6px 12px; border-radius: 6px; color: white;">Logout</a>
+        <a href="/">🏠 Home</a>
+        <a href="/cart">🛒 Cart (<span id="cartCount">0</span>)</a>
+        <a href="/orders" class="active">📦 Orders</a>
+        <a href="/contact">📞 Contact</a>
+        <span id="navAuth">
+            <a href="/login">🔑 Login</a>
+            <a href="/signup">✨ Sign Up</a>
+        </span>
     </nav>
 </header>
 
 <div class="container">
 
-    <div class="page-header">
-        <h2>📦 Order Management &amp; UTR Verification</h2>
-        <div style="font-size: 13px; color: #64748b;">Review customer UPI payments against PhonePe records &amp; dispatch orders.</div>
-    </div>
-
-    <!-- Quick Stat Cards -->
-    <div class="stats-grid">
-        <div class="stat-card alert" style="cursor:pointer;" onclick="setFilter('pending-verify')" title="Click to view awaiting verifications">
-            <div class="stat-info">
-                <h4>⏳ Awaiting UTR Verification</h4>
-                <div class="num" id="statPendingVerify">0</div>
-            </div>
-            <div class="stat-icon">🔔</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-info">
-                <h4>✅ Payment Verified</h4>
-                <div class="num" id="statVerified">0</div>
-            </div>
-            <div class="stat-icon">💳</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-info">
-                <h4>📦 Total Orders</h4>
-                <div class="num" id="statTotalOrders">0</div>
-            </div>
-            <div class="stat-icon">📚</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-info">
-                <h4>💰 Total Sales</h4>
-                <div class="num" id="statTotalSales">₹0</div>
-            </div>
-            <div class="stat-icon">💵</div>
+    <div class="page-title">
+        <h2>📜 Your Order History</h2>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div id="userInfo" class="user-badge">Guest Account</div>
+            <button class="btn-refresh-history" onclick="loadOrderHistory()" title="Check payment status">
+                🔄 Check Payment Status
+            </button>
         </div>
     </div>
 
-    <!-- Filter Tabs -->
-    <div class="filter-tabs">
-        <button class="tab-btn active" id="tab-all" onclick="setFilter('all')">
-            All Orders <span class="tab-count" id="count-all">0</span>
-        </button>
-        <button class="tab-btn" id="tab-pending-verify" onclick="setFilter('pending-verify')">
-            ⏳ Awaiting UTR Check <span class="tab-count" id="count-pending-verify">0</span>
-        </button>
-        <button class="tab-btn" id="tab-verified" onclick="setFilter('verified')">
-            ✅ Payment Verified <span class="tab-count" id="count-verified">0</span>
-        </button>
-        <button class="tab-btn" id="tab-cod" onclick="setFilter('cod')">
-            💵 Cash on Delivery <span class="tab-count" id="count-cod">0</span>
-        </button>
-        <button class="tab-btn" id="tab-shipped" onclick="setFilter('shipped')">
-            🚚 Shipped / Delivered <span class="tab-count" id="count-shipped">0</span>
-        </button>
-        <button class="tab-btn" id="tab-rejected" onclick="setFilter('rejected')">
-            ❌ Cancelled / Rejected <span class="tab-count" id="count-rejected">0</span>
-        </button>
+    <!-- Guest notice if not logged in -->
+    <div id="guestNotice" class="guest-banner" style="display:none;">
+        <p>🔒 <strong>You are browsing as a guest.</strong> Log in to sync and track all orders associated with your account.</p>
+        <a href="/login">🔑 Log In to Account</a>
     </div>
 
-    <!-- Search & Controls -->
-    <div class="search-bar-wrap">
-        <input type="text" id="orderSearch" class="search-input" placeholder="🔍 Search orders by 12-digit UTR Number, Customer Name, Email, or Phone..." oninput="applyFilters()">
-        <button class="refresh-btn" onclick="loadOrders()">🔄 Refresh</button>
+    <div class="filter-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by Order ID, Book Title, or UTR..." oninput="filterOrders()">
+        <select id="statusSelect" class="status-filter" onchange="filterOrders()">
+            <option value="ALL">All Statuses</option>
+            <option value="Awaiting Verification">Awaiting Verification</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing (Confirmed)</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
     </div>
 
-    <!-- Orders Table -->
-    <div class="order-table-card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Order ID &amp; Date</th>
-                    <th>Customer &amp; Contact</th>
-                    <th>Delivery Address</th>
-                    <th>Ordered Books</th>
-                    <th>Total (₹)</th>
-                    <th>Payment &amp; UTR Details</th>
-                    <th>Order Status</th>
-                    <th>Payment Verification</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="orderTableBody">
-                <tr><td colspan="9" style="text-align:center; padding: 40px; color: #64748b;">Loading orders...</td></tr>
-            </tbody>
-        </table>
+    <div id="ordersContainer">
+        <div style="text-align:center; padding: 40px; color:#64748b;">Loading your orders...</div>
     </div>
-
 </div>
 
-<!-- Modal: Reject Payment Reason -->
-<div class="modal-overlay" id="rejectModal">
+<!-- Modal: Update UTR -->
+<div class="modal-overlay" id="editUtrModal">
     <div class="modal-card">
-        <div class="modal-title">❌ Reject Payment for Order <span id="rejectOrderId"></span></div>
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 14px;">Select or type the reason why this payment cannot be verified:</p>
-        
-        <select id="rejectPreset" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px; font-size:13px;" onchange="onRejectPresetChange(this)">
-            <option value="UTR number not found in PhonePe statement.">UTR number not found in PhonePe statement.</option>
-            <option value="Payment amount does not match order total.">Payment amount does not match order total.</option>
-            <option value="Duplicate or already used UTR number.">Duplicate or already used UTR number.</option>
-            <option value="Invalid UTR format. Please provide valid 12-digit reference number.">Invalid UTR format.</option>
-            <option value="other">Other reason (type below)...</option>
-        </select>
+        <div class="modal-title">✏️ Update UTR Number</div>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+            If you made a mistake entering your 12-digit UTR during checkout, enter the correct reference number from your PhonePe/UPI payment receipt:
+        </p>
 
-        <textarea id="rejectReasonInput" rows="3" style="width:100%; padding:10px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; outline:none;" placeholder="Admin note for customer..."></textarea>
+        <label style="font-size:12px; font-weight:700; color:#334155; display:block; margin-bottom:6px;">
+            12-Digit UTR / UPI Reference Number *
+        </label>
+        <input type="text" id="editUtrInput" placeholder="e.g. 426812345678" maxlength="18"
+               style="width:100%; padding:12px; border:2px solid #cbd5e1; border-radius:8px; font-size:15px; font-family:monospace; font-weight:700; outline:none;"
+               oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()">
 
         <div class="modal-actions">
-            <button onclick="closeRejectModal()" style="padding:8px 16px; border-radius:8px; border:1px solid #cbd5e1; background:white; cursor:pointer; font-weight:600;">Cancel</button>
-            <button onclick="confirmRejectPayment()" style="padding:8px 16px; border-radius:8px; border:none; background:#dc2626; color:white; cursor:pointer; font-weight:700;">Confirm Rejection</button>
+            <button onclick="closeEditUtrModal()" style="padding:8px 16px; border-radius:8px; border:1px solid #cbd5e1; background:white; cursor:pointer;">Cancel</button>
+            <button onclick="submitUpdatedUtr()" style="padding:8px 16px; border-radius:8px; border:none; background:#2563eb; color:white; font-weight:700; cursor:pointer;">Submit for Verification</button>
         </div>
     </div>
 </div>
 
-<!-- Modal: Printable Invoice -->
+<!-- Modal: Customer Invoice -->
 <div class="modal-overlay" id="invoiceModal">
-    <div class="modal-card" style="max-width: 600px;">
+    <div class="modal-card" style="max-width: 620px;">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:12px; margin-bottom:16px;">
-            <h3 style="margin:0; font-size:18px;">🧾 Order Invoice</h3>
-            <button onclick="closeInvoiceModal()" style="border:none; background:none; font-size:20px; cursor:pointer; color:#64748b;">&times;</button>
+            <h3 style="margin:0; font-size:18px; color:#0f172a;">🧾 Order Invoice &amp; Receipt</h3>
+            <button onclick="closeInvoiceModal()" style="border:none; background:none; font-size:22px; cursor:pointer; color:#64748b;">&times;</button>
         </div>
         <div id="invoiceContent" style="font-size: 13px; color: #1e293b;"></div>
         <div class="modal-actions" style="border-top:1px solid #eee; padding-top:14px;">
             <button onclick="closeInvoiceModal()" style="padding:8px 16px; border-radius:8px; border:1px solid #cbd5e1; background:white; cursor:pointer;">Close</button>
-            <button onclick="window.print()" style="padding:8px 16px; border-radius:8px; border:none; background:#2563eb; color:white; cursor:pointer; font-weight:600;">🖨️ Print Invoice</button>
+            <button onclick="window.print()" style="padding:8px 16px; border-radius:8px; border:none; background:#2563eb; color:white; cursor:pointer; font-weight:700;">🖨️ Print Receipt</button>
         </div>
     </div>
 </div>
 
+<footer>
+    <img src="/images/logo.svg" alt="Venky's BookStore Logo" class="footer-logo">
+    <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/cart">Cart</a>
+        <a href="/orders">My Orders</a>
+        <a href="/contact">Contact</a>
+        <a href="/login">Login</a>
+        <a href="/admin/login">Admin</a>
+    </div>
+    <div class="footer-pay-icons">
+        Payments:
+        <span>🟣 PhonePe</span>
+        <span>🟢 GPay</span>
+        <span>💳 Cards</span>
+        <span>💵 COD</span>
+    </div>
+    <p>© 2026 Venky's BookStore. All Rights Reserved.</p>
+</footer>
+
+<script src="/js/auth.js"></script>
+
 <script>
 let allOrders = [];
-let currentFilter = "all";
-let activeRejectId = null;
+let currentUser = null;
+let editingOrderId = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    loadOrders();
+    currentUser = typeof getCurrentUser === "function" ? getCurrentUser() : JSON.parse(localStorage.getItem("user") || "null");
+    updateUserInfoBadge();
+    updateCartCount();
+    loadOrderHistory();
 });
 
-async function loadOrders() {
-    const tbody = document.getElementById("orderTableBody");
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: #64748b;">Loading latest orders...</td></tr>`;
+function updateUserInfoBadge() {
+    const userInfo = document.getElementById("userInfo");
+    const guestNotice = document.getElementById("guestNotice");
+    if (currentUser && currentUser.name) {
+        if (userInfo) {
+            userInfo.innerHTML = `👤 ${escapeHtml(currentUser.name)} (${escapeHtml(currentUser.email || "")})`;
+        }
+        if (guestNotice) guestNotice.style.display = "none";
+    } else {
+        if (userInfo) userInfo.textContent = "Guest Account";
+        if (guestNotice) guestNotice.style.display = "flex";
+    }
+}
+
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem("bookstoreCart")) || [];
+    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const el = document.getElementById("cartCount");
+    if (el) el.textContent = count;
+}
+
+async function loadOrderHistory() {
+    const container = document.getElementById("ordersContainer");
+    container.innerHTML = `<div style="text-align:center; padding: 40px; color:#64748b;">Loading your orders...</div>`;
 
     let serverOrders = [];
-    try {
-        const res = await fetch("/api/orders");
-        if (res.ok) serverOrders = await res.json();
-    } catch (err) {
-        console.warn("Could not fetch server orders:", err);
+    if (currentUser && currentUser.email) {
+        try {
+            // Fetch ONLY this customer's orders from server
+            const res = await fetch(`/api/orders/user/${encodeURIComponent(currentUser.email.trim())}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data)) serverOrders = data;
+            }
+        } catch (err) {
+            console.warn("Could not fetch user server orders:", err);
+        }
     }
 
+    // Merge with any local orders saved in bookstoreOrderHistory
     const localOrders = JSON.parse(localStorage.getItem("bookstoreOrderHistory")) || [];
     const orderMap = new Map();
 
-    if (Array.isArray(serverOrders)) {
-        serverOrders.forEach(o => {
-            const key = o._id || o.id;
-            if (key) orderMap.set(String(key), o);
-        });
-    }
+    serverOrders.forEach(o => {
+        const key = String(o._id || o.id);
+        if (key) orderMap.set(key, o);
+    });
 
-    if (Array.isArray(localOrders)) {
-        localOrders.forEach(o => {
-            const key = o._id || o.id || o.orderId;
-            if (key && !orderMap.has(String(key))) orderMap.set(String(key), o);
-        });
-    }
+    localOrders.forEach(o => {
+        const key = String(o._id || o.id || o.orderId);
+        const isMatch = !currentUser || !o.customerEmail || o.customerEmail.toLowerCase() === currentUser.email.toLowerCase();
+        if (key && !orderMap.has(key) && isMatch) {
+            orderMap.set(key, o);
+        }
+    });
 
     allOrders = Array.from(orderMap.values());
     allOrders.sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0));
 
-    updateCounters();
-    applyFilters();
+    renderOrders(allOrders);
 }
 
-function updateCounters() {
-    const total = allOrders.length;
-    let pendingVerify = 0;
-    let verified = 0;
-    let cod = 0;
-    let shipped = 0;
-    let rejected = 0;
-    let totalSales = 0;
-
-    allOrders.forEach(o => {
-        const pStatus = (o.paymentStatus || "").toLowerCase();
-        const oStatus = (o.status || "").toLowerCase();
-        const method = (o.paymentMethod || "").toLowerCase();
-        const amount = Number(o.totalAmount || o.total || 0);
-
-        if (pStatus.includes("pending") || (!o.paymentStatus && !method.includes("cod"))) {
-            pendingVerify++;
-        } else if (pStatus.includes("verified") || pStatus.includes("approved")) {
-            verified++;
-            totalSales += amount;
-        }
-
-        if (method.includes("cod") || method.includes("cash on delivery")) {
-            cod++;
-            if (oStatus === "delivered") totalSales += amount;
-        }
-
-        if (oStatus === "shipped" || oStatus === "delivered") {
-            shipped++;
-        }
-
-        if (pStatus.includes("reject") || oStatus === "cancelled") {
-            rejected++;
-        }
-    });
-
-    document.getElementById("statPendingVerify").textContent = pendingVerify;
-    document.getElementById("statVerified").textContent = verified;
-    document.getElementById("statTotalOrders").textContent = total;
-    document.getElementById("statTotalSales").textContent = `₹${totalSales.toLocaleString('en-IN')}`;
-
-    document.getElementById("count-all").textContent = total;
-    document.getElementById("count-pending-verify").textContent = pendingVerify;
-    document.getElementById("count-verified").textContent = verified;
-    document.getElementById("count-cod").textContent = cod;
-    document.getElementById("count-shipped").textContent = shipped;
-    document.getElementById("count-rejected").textContent = rejected;
-}
-
-function setFilter(filter) {
-    currentFilter = filter;
-    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-    const activeTab = document.getElementById("tab-" + filter);
-    if (activeTab) activeTab.classList.add("active");
-    applyFilters();
-}
-
-function applyFilters() {
-    const query = (document.getElementById("orderSearch").value || "").toLowerCase().trim();
-
-    let filtered = allOrders.filter(order => {
-        const pStatus = (order.paymentStatus || "").toLowerCase();
-        const oStatus = (order.status || "").toLowerCase();
-        const method = (order.paymentMethod || "").toLowerCase();
-
-        if (currentFilter === "pending-verify") {
-            if (!pStatus.includes("pending") && (order.paymentStatus || method.includes("cod"))) return false;
-        } else if (currentFilter === "verified") {
-            if (!pStatus.includes("verified") && !pStatus.includes("approved")) return false;
-        } else if (currentFilter === "cod") {
-            if (!method.includes("cod") && !method.includes("cash on delivery")) return false;
-        } else if (currentFilter === "shipped") {
-            if (oStatus !== "shipped" && oStatus !== "delivered") return false;
-        } else if (currentFilter === "rejected") {
-            if (!pStatus.includes("reject") && oStatus !== "cancelled") return false;
-        }
-
-        if (query) {
-            const id = (order._id || order.id || order.orderId || "").toLowerCase();
-            const name = (order.customerName || "").toLowerCase();
-            const email = (order.customerEmail || "").toLowerCase();
-            const utr = (order.utrNumber || order.transactionId || "").toLowerCase();
-            const phone = (order.deliveryAddress?.phone || order.phone || "").toLowerCase();
-
-            const matches = id.includes(query) || name.includes(query) || email.includes(query) || utr.includes(query) || phone.includes(query);
-            if (!matches) return false;
-        }
-
-        return true;
-    });
-
-    renderTable(filtered);
-}
-
-function renderTable(orders) {
-    const tbody = document.getElementById("orderTableBody");
+function renderOrders(orders) {
+    const container = document.getElementById("ordersContainer");
     if (!orders || orders.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: #64748b;">No matching orders found.</td></tr>`;
+        container.innerHTML = `
+            <div style="text-align:center; padding: 60px 20px; background:white; border-radius:14px; border:1px solid #e2e8f0;">
+                <div style="font-size:48px; margin-bottom:10px;">📦</div>
+                <h3 style="color:#0f172a; margin-bottom:6px;">No Orders Placed Yet</h3>
+                <p style="color:#64748b; font-size:14px; margin-bottom:20px;">Explore our collection of programming and computer science books!</p>
+                <a href="/" style="display:inline-block; background:#2563eb; color:white; padding:10px 24px; border-radius:8px; text-decoration:none; font-weight:700;">🛒 Browse Books</a>
+            </div>
+        `;
         return;
     }
 
-    tbody.innerHTML = orders.map((order, idx) => {
+    container.innerHTML = orders.map((order, idx) => {
         const id = order._id || order.id || order.orderId || `LOCAL-${idx}`;
         const displayId = String(id).startsWith("#") ? id : `#ORD-${String(id).slice(-8).toUpperCase()}`;
-        const dateStr = new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', {
+        const formattedDate = new Date(order.createdAt || order.date || Date.now()).toLocaleDateString('en-IN', {
             day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
         });
 
-        const name = escapeHtml(order.customerName || "Customer");
-        const email = escapeHtml(order.customerEmail || "N/A");
-        const addrObj = order.deliveryAddress || {};
-        const phone = escapeHtml(addrObj.phone || order.phone || "N/A");
-        const address = escapeHtml(addrObj.fullAddress || [addrObj.street, addrObj.city, addrObj.state, addrObj.zipCode].filter(Boolean).join(", ") || order.address || "No address");
-
-        // Items list
-        const items = order.items || [];
-        const itemsHtml = items.length > 0 
-            ? items.map(i => `• ${escapeHtml(i.title)} <span style="color:#64748b;">(×${i.quantity || 1})</span>`).join("<br>")
-            : (order.bookTitle ? `• ${escapeHtml(order.bookTitle)} (×${order.quantity || 1})` : "Item details unavailable");
-
-        const total = Number(order.totalAmount || order.total || 0).toFixed(2);
-
-        // Payment status badge
+        const rawStatus = order.status || 'Pending';
+        const pStatus = (order.paymentStatus || "").toLowerCase();
         const method = order.paymentMethod || "PhonePe UPI";
-        const isCod = method.toLowerCase().includes("cod") || method.toLowerCase().includes("cash on delivery");
+        const isCod = method.toLowerCase().includes("cod") || method.toLowerCase().includes("cash");
         const utr = (order.utrNumber || order.transactionId || "").trim();
-        const pStatus = order.paymentStatus || (isCod ? "Unpaid (Cash on Delivery)" : "Pending Verification");
 
-        let pBadge = "";
-        if (pStatus.includes("Verified") || pStatus.includes("Approved")) {
-            pBadge = `<span class="badge badge-verified">✅ Verified &amp; Approved</span>`;
-        } else if (pStatus.includes("Rejected")) {
-            pBadge = `<span class="badge badge-rejected">❌ Rejected</span>`;
+        // Tracker stage calculation
+        let currentStage = 1;
+        const isRejected = pStatus.includes("reject") || rawStatus.toLowerCase() === "cancelled";
+        const isVerified = pStatus.includes("verified") || pStatus.includes("approved");
+
+        if (rawStatus.toLowerCase() === "delivered") {
+            currentStage = 4;
+        } else if (rawStatus.toLowerCase() === "shipped") {
+            currentStage = 3;
+        } else if (isVerified || rawStatus.toLowerCase() === "processing") {
+            currentStage = 2;
         } else if (isCod) {
-            pBadge = `<span class="badge badge-cod">💵 COD</span>`;
-        } else {
-            pBadge = `<span class="badge badge-pending">⏳ Pending Verification</span>`;
+            currentStage = 2;
         }
 
-        // Verification actions
-        let verifyActions = "";
-        const isPending = pStatus.includes("Pending") || (!order.paymentStatus && !isCod);
-
-        if (isPending) {
-            verifyActions = `
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                    <button class="btn-approve" onclick="verifyPayment('${id}', 'approve')">
-                        ✅ Approve Payment
-                    </button>
-                    <button class="btn-reject" onclick="openRejectModal('${id}')">
-                        ❌ Reject UTR
-                    </button>
-                </div>
-            `;
-        } else if (pStatus.includes("Verified")) {
-            verifyActions = `
-                <div style="color: #15803d; font-size: 12px; font-weight: 700;">
-                    ✓ Payment Verified<br>
-                    <small style="color:#64748b; font-weight: normal;">${order.verifiedAt ? new Date(order.verifiedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</small>
-                </div>
-            `;
-        } else if (pStatus.includes("Rejected")) {
-            verifyActions = `
-                <div style="color: #b91c1c; font-size: 12px; font-weight: 700;">
-                    ✕ Payment Rejected<br>
-                    <small style="color:#64748b; font-weight: normal;">${escapeHtml(order.adminNote || '')}</small>
+        // Stepper HTML
+        let trackerHtml = "";
+        if (!isRejected) {
+            const lineWidth = currentStage === 4 ? "80%" : (currentStage === 3 ? "55%" : (currentStage === 2 ? "28%" : "0%"));
+            trackerHtml = `
+                <div class="tracker-wrap">
+                    <div class="tracker-steps">
+                        <div class="tracker-progress-line" style="width:${lineWidth};"></div>
+                        <div class="step ${currentStage >= 1 ? 'done' : ''}">
+                            <div class="step-dot">${currentStage > 1 ? '✓' : '1'}</div>
+                            <div class="step-label">Order Placed</div>
+                        </div>
+                        <div class="step ${currentStage >= 2 ? (currentStage > 2 ? 'done' : 'active') : ''}">
+                            <div class="step-dot">${currentStage > 2 ? '✓' : (isCod ? '💵' : '2')}</div>
+                            <div class="step-label">${isCod ? 'COD Confirmed' : (isVerified ? 'Payment Verified' : 'UTR Verification')}</div>
+                        </div>
+                        <div class="step ${currentStage >= 3 ? (currentStage > 3 ? 'done' : 'active') : ''}">
+                            <div class="step-dot">${currentStage > 3 ? '✓' : '3'}</div>
+                            <div class="step-label">Dispatched</div>
+                        </div>
+                        <div class="step ${currentStage >= 4 ? 'done' : ''}">
+                            <div class="step-dot">4</div>
+                            <div class="step-label">Delivered</div>
+                        </div>
+                    </div>
                 </div>
             `;
         } else {
-            verifyActions = `<span style="font-size:12px; color:#64748b;">COD Order</span>`;
+            trackerHtml = `
+                <div class="tracker-wrap" style="background:#fef2f2;">
+                    <div class="tracker-steps" style="max-width:300px;">
+                        <div class="step rejected">
+                            <div class="step-dot">✕</div>
+                            <div class="step-label" style="color:#dc2626;">Order Cancelled</div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
-        const oStatus = order.status || (isPending ? "Awaiting Verification" : "Pending");
+        // UTR Notice Banner
+        let utrBanner = "";
+        if (isCod) {
+            utrBanner = `
+                <div class="utr-banner cod">
+                    <div>
+                        💵 <strong>Cash on Delivery:</strong> Please keep exact cash ready upon delivery at your address.
+                    </div>
+                </div>
+            `;
+        } else if (isVerified) {
+            utrBanner = `
+                <div class="utr-banner verified">
+                    <div>
+                        ✅ <strong>Payment Verified:</strong> Your UTR <span class="utr-tag">${escapeHtml(utr)}</span> was approved by Admin. Your order is confirmed!
+                    </div>
+                    <button class="btn-edit-utr" onclick="copyText('${escapeHtml(utr)}')">📋 Copy UTR</button>
+                </div>
+            `;
+        } else if (isRejected) {
+            utrBanner = `
+                <div class="utr-banner rejected">
+                    <div>
+                        ❌ <strong>Payment Verification Failed:</strong> ${escapeHtml(order.adminNote || 'UTR could not be verified in PhonePe statement.')}
+                    </div>
+                    <button class="btn-edit-utr" style="background:#dc2626; color:white; border:none;" onclick="openEditUtrModal('${id}', '${escapeHtml(utr)}')">
+                        ✏️ Correct / Re-enter UTR
+                    </button>
+                </div>
+            `;
+        } else {
+            utrBanner = `
+                <div class="utr-banner pending">
+                    <div>
+                        ⏳ <strong>Admin Verification Pending:</strong> UTR <span class="utr-tag">${escapeHtml(utr || 'Not Provided')}</span> submitted. Admin will verify against PhonePe receipts.
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-edit-utr" onclick="copyText('${escapeHtml(utr)}')">📋 Copy</button>
+                        <button class="btn-edit-utr" onclick="openEditUtrModal('${id}', '${escapeHtml(utr)}')">✏️ Edit UTR</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        const items = order.items || [];
+        const total = Number(order.totalAmount || order.total || 0).toFixed(2);
+        const addrObj = order.deliveryAddress || {};
+        const addressText = escapeHtml(addrObj.fullAddress || [addrObj.street, addrObj.city, addrObj.state, addrObj.zipCode].filter(Boolean).join(", ") || order.address || "No address provided");
+        const phoneText = escapeHtml(addrObj.phone || order.phone || "N/A");
 
         return `
-            <tr>
-                <td>
-                    <strong style="color:#0f172a; font-size:14px;">${displayId}</strong><br>
-                    <small style="color:#64748b;">${dateStr}</small>
-                </td>
-                <td>
-                    <strong>👤 ${name}</strong><br>
-                    <small style="color:#64748b;">✉️ ${email}</small><br>
-                    <small style="color:#2563eb; font-weight:600;">📞 ${phone}</small>
-                </td>
-                <td style="max-width:200px; font-size:12px; color:#334155;">
-                    📍 ${address}
-                </td>
-                <td style="font-size:12px; max-width:220px;">
-                    ${itemsHtml}
-                </td>
-                <td>
-                    <strong style="font-size:15px; color:#0f172a;">₹${total}</strong>
-                </td>
-                <td>
-                    <div style="font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">${escapeHtml(method)}</div>
-                    ${pBadge}
-                    ${utr ? `
-                        <div style="margin-top:6px;">
-                            <div class="utr-pill">
-                                🔢 ${escapeHtml(utr)}
-                                <button class="btn-copy" onclick="copyUtr('${escapeHtml(utr)}')" title="Copy UTR to verify in PhonePe">📋</button>
-                            </div>
+            <div class="order-card">
+                <div class="order-header">
+                    <div>
+                        <span class="order-id">${displayId}</span>
+                        <span style="color:#64748b; font-size:13px; margin-left:12px;">📅 ${formattedDate}</span>
+                    </div>
+                    <div>
+                        ${isVerified 
+                            ? `<span class="badge badge-verified">✅ Payment Verified</span>` 
+                            : (isRejected 
+                                ? `<span class="badge badge-rejected">❌ Payment Rejected</span>` 
+                                : (isCod ? `<span class="badge badge-cod">💵 COD</span>` : `<span class="badge badge-pending">⏳ Verification Pending</span>`))}
+                        <span class="badge" style="background:#f1f5f9; color:#334155; margin-left:6px;">${escapeHtml(rawStatus)}</span>
+                    </div>
+                </div>
+
+                ${trackerHtml}
+
+                ${utrBanner}
+
+                <div class="customer-details">
+                    <div>👤 <strong>Recipient:</strong> ${escapeHtml(order.customerName || "Customer")}</div>
+                    <div>📞 <strong>Phone:</strong> ${phoneText}</div>
+                    <div style="grid-column: 1 / -1;">📍 <strong>Delivery Address:</strong> ${addressText}</div>
+                </div>
+
+                <div class="order-items">
+                    ${items.map(i => `
+                        <div class="item-row">
+                            <div>📖 <strong>${escapeHtml(i.title)}</strong> <span style="color:#64748b; font-size:13px;">${i.author ? `(${escapeHtml(i.author)})` : ''}</span></div>
+                            <div>₹${Number(i.price).toFixed(2)} × ${i.quantity || 1} = <strong>₹${(Number(i.price) * (i.quantity || 1)).toFixed(2)}</strong></div>
                         </div>
-                    ` : (isCod ? '' : '<div style="color:#ef4444; font-size:11px; margin-top:4px;">⚠️ No UTR submitted</div>')}
-                </td>
-                <td>
-                    <select id="status-${id}" style="padding:6px; border-radius:6px; border:1px solid #cbd5e1; font-size:12px; font-weight:600;">
-                        <option value="Awaiting Verification" ${oStatus === "Awaiting Verification" ? "selected" : ""}>Awaiting Verification</option>
-                        <option value="Pending" ${oStatus === "Pending" ? "selected" : ""}>Pending</option>
-                        <option value="Processing" ${oStatus === "Processing" ? "selected" : ""}>Processing (Confirmed)</option>
-                        <option value="Shipped" ${oStatus === "Shipped" ? "selected" : ""}>Shipped</option>
-                        <option value="Delivered" ${oStatus === "Delivered" ? "selected" : ""}>Delivered</option>
-                        <option value="Cancelled" ${oStatus === "Cancelled" ? "selected" : ""}>Cancelled</option>
-                    </select>
-                    <div style="margin-top:6px;">
-                        <button class="btn-save" onclick="saveOrderStatus('${id}')">Save Status</button>
+                    `).join('')}
+                </div>
+
+                <div class="order-footer">
+                    <div class="order-total">Total Amount: ₹${total}</div>
+                    <div class="btn-action-group">
+                        <button class="btn-secondary-action" onclick="viewCustomerInvoice('${id}')">🧾 View Invoice</button>
+                        <button class="btn-reorder" onclick="reorderItems(${escapeAttrJson(items)})">🔄 Re-order</button>
                     </div>
-                </td>
-                <td>
-                    ${verifyActions}
-                </td>
-                <td>
-                    <div style="display:flex; gap:6px; align-items:center;">
-                        <button class="btn-invoice" onclick="viewInvoice('${id}')" title="View & Print Invoice">🧾</button>
-                        <button class="btn-del" onclick="deleteOrder('${id}')" title="Delete Order">🗑️</button>
-                    </div>
-                </td>
-            </tr>
+                </div>
+            </div>
         `;
-    }).join("");
+    }).join('');
 }
 
-/* ── Copy UTR ── */
-function copyUtr(utr) {
-    navigator.clipboard.writeText(utr).then(() => {
-        alert("✅ Copied UTR: " + utr + "\nPaste into PhonePe / Bank app to verify payment.");
-    }).catch(() => {
-        prompt("Copy this UTR:", utr);
-    });
+function escapeAttrJson(obj) {
+    return JSON.stringify(obj || []).replace(/"/g, '&quot;');
 }
 
-/* ── Approve or Reject Payment ── */
-async function verifyPayment(id, action, note = "") {
+function filterOrders() {
+    const term = document.getElementById("searchInput").value.toLowerCase().trim();
+    const status = document.getElementById("statusSelect").value;
+
+    renderOrders(allOrders.filter(o => {
+        const id = (o._id || o.id || o.orderId || "").toLowerCase();
+        const utr = (o.utrNumber || o.transactionId || "").toLowerCase();
+        const items = o.items || [];
+        const matchesTerm = !term || id.includes(term) || utr.includes(term) || items.some(i => (i.title || "").toLowerCase().includes(term));
+        const matchesStatus = status === "ALL" || (o.status || "Pending") === status;
+        return matchesTerm && matchesStatus;
+    }));
+}
+
+/* ── Edit UTR Modal ── */
+function openEditUtrModal(orderId, currentUtr) {
+    editingOrderId = orderId;
+    document.getElementById("editUtrInput").value = currentUtr && currentUtr !== "Not Provided" ? currentUtr : "";
+    document.getElementById("editUtrModal").style.display = "flex";
+    document.getElementById("editUtrInput").focus();
+}
+
+function closeEditUtrModal() {
+    editingOrderId = null;
+    document.getElementById("editUtrModal").style.display = "none";
+}
+
+async function submitUpdatedUtr() {
+    if (!editingOrderId) return;
+    const utr = document.getElementById("editUtrInput").value.trim();
+    if (!utr || utr.length < 8) {
+        alert("Please enter a valid 12-digit UTR number from your payment receipt.");
+        return;
+    }
+
     try {
-        const res = await fetch(`/api/orders/${id}/verify-payment`, {
+        const res = await fetch(`/api/orders/${editingOrderId}/update-utr`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action, adminNote: note })
+            body: JSON.stringify({ utrNumber: utr })
         });
         const data = await res.json();
         if (res.ok) {
-            alert(`✅ Order payment has been ${action === "approve" ? "APPROVED! The order is now Confirmed & Processing." : "REJECTED."}`);
-            loadOrders();
+            alert("✅ UTR updated successfully! It has been submitted to Admin for verification.");
+            closeEditUtrModal();
+            loadOrderHistory();
         } else {
-            alert("Error: " + (data.message || "Failed to update payment status"));
+            alert("Error: " + (data.message || "Failed to update UTR"));
         }
     } catch (e) {
         alert("Failed to connect to server: " + e.message);
     }
 }
 
-/* ── Reject Modal Handling ── */
-function openRejectModal(id) {
-    activeRejectId = id;
-    document.getElementById("rejectOrderId").textContent = id.slice(-8).toUpperCase();
-    document.getElementById("rejectReasonInput").value = document.getElementById("rejectPreset").value;
-    document.getElementById("rejectModal").style.display = "flex";
-}
-
-function closeRejectModal() {
-    activeRejectId = null;
-    document.getElementById("rejectModal").style.display = "none";
-}
-
-function onRejectPresetChange(sel) {
-    const inp = document.getElementById("rejectReasonInput");
-    if (sel.value === "other") inp.value = "";
-    else inp.value = sel.value;
-}
-
-function confirmRejectPayment() {
-    if (!activeRejectId) return;
-    const note = document.getElementById("rejectReasonInput").value.trim() || "Payment could not be verified against PhonePe records.";
-    verifyPayment(activeRejectId, "reject", note);
-    closeRejectModal();
-}
-
-/* ── Save Order Status Dropdown ── */
-async function saveOrderStatus(id) {
-    const sel = document.getElementById("status-" + id);
-    if (!sel) return;
-    const newStatus = sel.value;
-
-    try {
-        const res = await fetch(`/api/orders/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: newStatus })
-        });
-        if (res.ok) {
-            alert("Order status saved as: " + newStatus);
-            loadOrders();
-        } else {
-            alert("Failed to save status");
-        }
-    } catch (e) {
-        alert("Server error: " + e.message);
-    }
-}
-
-/* ── Delete Order ── */
-async function deleteOrder(id) {
-    if (!confirm("Are you sure you want to delete this order? This cannot be undone.")) return;
-    try {
-        const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
-        if (res.ok) {
-            alert("Order deleted.");
-            loadOrders();
-        } else {
-            alert("Failed to delete order");
-        }
-    } catch (e) {
-        alert("Server error: " + e.message);
-    }
-}
-
-/* ── Invoice View ── */
-function viewInvoice(id) {
-    const order = allOrders.find(o => (o._id === id || o.id === id || o.orderId === id));
+/* ── Customer Invoice ── */
+function viewCustomerInvoice(id) {
+    const order = allOrders.find(o => (String(o._id) === String(id) || String(o.id) === String(id) || String(o.orderId) === String(id)));
     if (!order) return;
 
     const displayId = String(id).slice(-8).toUpperCase();
@@ -619,13 +534,13 @@ function viewInvoice(id) {
 
     const content = `
         <div style="margin-bottom:15px; border-bottom:2px solid #0f172a; padding-bottom:10px;">
-            <div style="display:flex; justify-content:space-between;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                    <h2 style="margin:0; color:#0f172a;">📚 Online Book Store</h2>
-                    <p style="margin:3px 0 0; color:#64748b; font-size:12px;">Official Customer Receipt</p>
+                    <h2 style="margin:0; color:#0f172a;">Venky's BookStore</h2>
+                    <p style="margin:3px 0 0; color:#64748b; font-size:12px;">Customer Payment &amp; Order Invoice</p>
                 </div>
                 <div style="text-align:right;">
-                    <strong>Invoice #ORD-${displayId}</strong><br>
+                    <strong>#ORD-${displayId}</strong><br>
                     <span style="color:#64748b;">${date}</span>
                 </div>
             </div>
@@ -644,10 +559,10 @@ function viewInvoice(id) {
             </div>
         </div>
 
-        <table style="width:100%; border-collapse:collapse; margin-bottom:15px; min-width:auto;">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
             <thead>
                 <tr style="background:#f1f5f9; border-bottom:1px solid #cbd5e1;">
-                    <th style="color:#0f172a; padding:8px;">Book Title</th>
+                    <th style="color:#0f172a; padding:8px; text-align:left;">Book Title</th>
                     <th style="color:#0f172a; padding:8px; text-align:center;">Qty</th>
                     <th style="color:#0f172a; padding:8px; text-align:right;">Price</th>
                     <th style="color:#0f172a; padding:8px; text-align:right;">Total</th>
@@ -671,15 +586,15 @@ function viewInvoice(id) {
                 <strong>${escapeHtml(order.paymentMethod || 'PhonePe UPI')}</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span>UTR / UPI Reference No:</span>
+                <span>UTR / Transaction Reference:</span>
                 <strong style="font-family:monospace; color:#2563eb;">${escapeHtml(utr)}</strong>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                <span>Payment Verification Status:</span>
+                <span>Payment Verification:</span>
                 <strong>${escapeHtml(pStatus)}</strong>
             </div>
             <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:800; border-top:1px dashed #cbd5e1; padding-top:8px; margin-top:8px; color:#0f172a;">
-                <span>Grand Total:</span>
+                <span>Total Amount Paid / Due:</span>
                 <span>₹${Number(order.totalAmount || order.total || 0).toFixed(2)}</span>
             </div>
         </div>
@@ -691,6 +606,23 @@ function viewInvoice(id) {
 
 function closeInvoiceModal() {
     document.getElementById("invoiceModal").style.display = "none";
+}
+
+function copyText(txt) {
+    if (!txt || txt === "Not Provided") return;
+    navigator.clipboard.writeText(txt).then(() => {
+        alert("✅ Copied to clipboard: " + txt);
+    }).catch(() => {
+        prompt("Copy UTR:", txt);
+    });
+}
+
+function reorderItems(items) {
+    let cart = JSON.parse(localStorage.getItem("bookstoreCart")) || [];
+    items.forEach(i => cart.push({ id: Date.now().toString() + Math.random(), title: i.title, author: i.author || "", price: i.price, quantity: i.quantity || 1 }));
+    localStorage.setItem("bookstoreCart", JSON.stringify(cart));
+    alert("🛒 Items added back to your cart!");
+    window.location.href = "/cart";
 }
 
 function escapeHtml(str) {

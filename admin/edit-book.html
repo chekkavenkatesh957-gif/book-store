@@ -3,128 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Book</title>
-
+<title>Admin - Edit Book | Venky's BookStore</title>
+<link rel="stylesheet" href="/css/style.css">
 <style>
-body{
-    font-family:Arial,sans-serif;
-    background:#f4f4f4;
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background: #f4f6f9; min-height: 100vh; display: flex; flex-direction: column; color: #1e293b; }
+header { background: #0f172a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+header h1 a { color: white; text-decoration: none; font-size: 22px; font-weight: 700; }
+nav a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 15px; font-weight: 500; font-size: 14px; transition: color 0.2s; }
+nav a:hover, nav a.active { color: white; font-weight: 700; }
+.container { width: 92%; max-width: 650px; margin: 35px auto; flex: 1; }
+
+.form-card { background: white; padding: 32px; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+.form-card h2 { color: #0f172a; font-size: 24px; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.form-card p { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; font-family: inherit;
 }
-.container{
-    width:450px;
-    margin:40px auto;
-    background:#fff;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,.2);
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
 }
-h2{
-    text-align:center;
-    color:#0d6efd;
-}
-input{
-    width:100%;
-    padding:12px;
-    margin:10px 0;
-    border:1px solid #ccc;
-    border-radius:5px;
-    box-sizing:border-box;
-}
-button{
-    width:100%;
-    padding:12px;
-    background:#0d6efd;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    font-size:16px;
-}
-button:hover{
-    background:#0b5ed7;
-}
-a{
-    display:block;
-    text-align:center;
-    margin-top:15px;
-    text-decoration:none;
-}
+
+.btn-submit { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+.btn-submit:hover { background: #1d4ed8; }
+
+.back-link { display: inline-block; margin-top: 16px; color: #64748b; text-decoration: none; font-size: 14px; font-weight: 600; text-align: center; width: 100%; }
+.back-link:hover { color: #0f172a; text-decoration: underline; }
 </style>
 </head>
 
 <body>
 
+<header>
+    <h1><a href="/admin/dashboard">🛠️ Admin Dashboard</a></h1>
+    <nav>
+        <a href="/" target="_blank" style="background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 6px;">🏠 Storefront</a>
+        <a href="/orders" target="_blank" style="background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 6px;">📜 User Orders</a>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/add-book">Add Book</a>
+        <a href="/admin/manage-book">Manage Books</a>
+        <a href="/admin/manage-user">Manage Users</a>
+        <a href="/admin/orders">Manage Orders</a>
+        <a href="/admin/login" style="background: #ef4444; padding: 6px 12px; border-radius: 6px; color: white;">Logout</a>
+    </nav>
+</header>
+
 <div class="container">
-<h2>Edit Book</h2>
+    <div class="form-card">
+        <h2>✏️ Edit Book Details</h2>
+        <p>Update pricing, author, category, or cover details for this book.</p>
 
-<form id="editBookForm">
+        <form id="editBookForm">
+            <div class="form-group">
+                <label>Book Title *</label>
+                <input type="text" id="title" placeholder="Book Title" required>
+            </div>
 
-<input type="text" id="title" placeholder="Book Title" required>
+            <div class="form-group">
+                <label>Author Name *</label>
+                <input type="text" id="author" placeholder="Author Name" required>
+            </div>
 
-<input type="text" id="author" placeholder="Author" required>
+            <div class="form-group">
+                <label>Price (₹) *</label>
+                <input type="number" id="price" placeholder="Price" min="1" step="1" required>
+            </div>
 
-<input type="number" id="price" placeholder="Price" required>
+            <div class="form-group">
+                <label>Category *</label>
+                <select id="category" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="Programming">Programming</option>
+                    <option value="Web">Web Development</option>
+                    <option value="Backend">Backend / API</option>
+                    <option value="Database">Database</option>
+                    <option value="AI & ML">AI & ML</option>
+                    <option value="Cloud & DevOps">Cloud & DevOps</option>
+                    <option value="Security">Security</option>
+                    <option value="Architecture">Architecture</option>
+                    <option value="CS Theory">CS Theory</option>
+                    <option value="Interview Prep">Interview Prep</option>
+                    <option value="Mobile Dev">Mobile Dev</option>
+                    <option value="Career">Career & Soft Skills</option>
+                </select>
+            </div>
 
-<input type="text" id="category" placeholder="Category" required>
+            <div class="form-group">
+                <label>Cover Image (Optional)</label>
+                <input type="text" id="image" placeholder="Image filename (e.g. java.svg)">
+            </div>
 
-<input type="text" id="image" placeholder="Book Image Filename or URL (e.g. java.jpg)">
+            <button type="submit" id="submitBtn" class="btn-submit">💾 Save Changes</button>
+        </form>
 
-<button type="submit">Update Book</button>
-
-</form>
-
-<a href="/manage-book">⬅️ Back to Manage Books</a>
-
+        <a href="/admin/manage-book" class="back-link">⬅️ Back to Manage Books</a>
+    </div>
 </div>
+
+<footer>
+    <p>© 2026 Online Book Store - Admin Panel</p>
+</footer>
 
 <script>
 const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+const bookId = params.get("id");
 
 async function loadBookDetails() {
-    if (!id) return;
+    if (!bookId) {
+        alert("No book ID provided in URL!");
+        window.location.href = "/admin/manage-book";
+        return;
+    }
     try {
         const res = await fetch("/api/books");
+        if (!res.ok) throw new Error("Failed to fetch books list");
         const books = await res.json();
-        const book = books.find(b => (b._id === id || b.id === id));
+        const book = books.find(b => (String(b._id || b.id) === String(bookId)));
         if (book) {
             document.getElementById("title").value = book.title || "";
             document.getElementById("author").value = book.author || "";
             document.getElementById("price").value = book.price || "";
             document.getElementById("category").value = book.category || "";
             document.getElementById("image").value = book.image || "";
+        } else {
+            alert("Book not found!");
+            window.location.href = "/admin/manage-book";
         }
     } catch (e) {
-        console.error("Failed to load book details", e);
+        console.error("Failed to load book details:", e);
     }
 }
 
 document.addEventListener("DOMContentLoaded", loadBookDetails);
 
-document.getElementById("editBookForm").addEventListener("submit", async function(e){
+document.getElementById("editBookForm").addEventListener("submit", async function(e) {
     e.preventDefault();
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.textContent = "Saving...";
 
-    const book = {
-        title: document.getElementById("title").value,
-        author: document.getElementById("author").value,
-        price: document.getElementById("price").value,
+    const updatedData = {
+        title: document.getElementById("title").value.trim(),
+        author: document.getElementById("author").value.trim(),
+        price: Number(document.getElementById("price").value),
         category: document.getElementById("category").value,
-        image: document.getElementById("image").value
+        image: document.getElementById("image").value.trim()
     };
 
-    const res = await fetch("/api/books/" + id, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(book)
-    });
+    try {
+        const res = await fetch("/api/books/" + encodeURIComponent(bookId), {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedData)
+        });
 
-    if(res.ok){
-        alert("Book updated successfully");
-        window.location.href="/manage-book";
-    }else{
-        alert("Failed to update book");
+        if (res.ok) {
+            alert("✅ Book updated successfully!");
+            window.location.href = "/admin/manage-book";
+        } else {
+            const data = await res.json();
+            alert("⚠️ Failed to update book: " + (data.message || "Unknown error"));
+            btn.disabled = false;
+            btn.textContent = "💾 Save Changes";
+        }
+    } catch (err) {
+        alert("Server error: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "💾 Save Changes";
     }
 });
 </script>

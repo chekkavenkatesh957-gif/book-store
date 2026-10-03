@@ -3,129 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add Book</title>
-
+<title>Admin - Add New Book | Venky's BookStore</title>
+<link rel="stylesheet" href="/css/style.css">
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background: #f4f6f9; min-height: 100vh; display: flex; flex-direction: column; color: #1e293b; }
+header { background: #0f172a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+header h1 a { color: white; text-decoration: none; font-size: 22px; font-weight: 700; }
+nav a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 15px; font-weight: 500; font-size: 14px; transition: color 0.2s; }
+nav a:hover, nav a.active { color: white; font-weight: 700; }
+.container { width: 92%; max-width: 650px; margin: 35px auto; flex: 1; }
+
+.form-card { background: white; padding: 32px; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+.form-card h2 { color: #0f172a; font-size: 24px; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.form-card p { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-weight: 700; font-size: 13px; color: #334155; margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; font-family: inherit;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
 }
 
-body{
-    background:#f4f4f4;
-}
+.btn-submit { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+.btn-submit:hover { background: #1d4ed8; }
 
-.container{
-    width:500px;
-    margin:40px auto;
-    background:#fff;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.2);
-}
-
-h2{
-    text-align:center;
-    color:#0d47a1;
-    margin-bottom:20px;
-}
-
-input,select,textarea{
-    width:100%;
-    padding:12px;
-    margin-bottom:15px;
-    border:1px solid #ccc;
-    border-radius:5px;
-    font-size:16px;
-}
-
-button{
-    width:100%;
-    padding:12px;
-    background:#0d47a1;
-    color:white;
-    border:none;
-    border-radius:5px;
-    font-size:18px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#1565c0;
-}
-
-a{
-    display:block;
-    text-align:center;
-    margin-top:15px;
-    text-decoration:none;
-    color:#0d47a1;
-}
+.back-link { display: inline-block; margin-top: 16px; color: #64748b; text-decoration: none; font-size: 14px; font-weight: 600; text-align: center; width: 100%; }
+.back-link:hover { color: #0f172a; text-decoration: underline; }
 </style>
-
 </head>
 
 <body>
 
+<header>
+    <h1><a href="/admin/dashboard">🛠️ Admin Dashboard</a></h1>
+    <nav>
+        <a href="/" target="_blank" style="background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 6px;">🏠 Storefront</a>
+        <a href="/orders" target="_blank" style="background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 6px;">📜 User Orders</a>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/add-book" class="active">Add Book</a>
+        <a href="/admin/manage-book">Manage Books</a>
+        <a href="/admin/manage-user">Manage Users</a>
+        <a href="/admin/orders">Manage Orders</a>
+        <a href="/admin/login" style="background: #ef4444; padding: 6px 12px; border-radius: 6px; color: white;">Logout</a>
+    </nav>
+</header>
+
 <div class="container">
+    <div class="form-card">
+        <h2>📚 Add New Book to Catalogue</h2>
+        <p>Fill out the details below to add a new book to the store.</p>
 
-<h2>📚 Add New Book</h2>
+        <form id="addBookForm">
+            <div class="form-group">
+                <label>Book Title *</label>
+                <input type="text" id="title" placeholder="e.g. Master React & Node.js" required>
+            </div>
 
-<form action="/api/books" method="POST">
+            <div class="form-group">
+                <label>Author Name *</label>
+                <input type="text" id="author" placeholder="e.g. John Doe" required>
+            </div>
 
-<input
-type="text"
-name="title"
-placeholder="Book Title"
-required>
+            <div class="form-group">
+                <label>Price (₹) *</label>
+                <input type="number" id="price" placeholder="e.g. 599" min="1" step="1" required>
+            </div>
 
-<input
-type="text"
-name="author"
-placeholder="Author Name"
-required>
+            <div class="form-group">
+                <label>Category *</label>
+                <select id="category" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="Programming">Programming</option>
+                    <option value="Web">Web Development</option>
+                    <option value="Backend">Backend / API</option>
+                    <option value="Database">Database</option>
+                    <option value="AI & ML">AI & ML</option>
+                    <option value="Cloud & DevOps">Cloud & DevOps</option>
+                    <option value="Security">Security</option>
+                    <option value="Architecture">Architecture</option>
+                    <option value="CS Theory">CS Theory</option>
+                    <option value="Interview Prep">Interview Prep</option>
+                    <option value="Mobile Dev">Mobile Dev</option>
+                    <option value="Career">Career & Soft Skills</option>
+                </select>
+            </div>
 
-<input
-type="number"
-name="price"
-placeholder="Price"
-required>
+            <div class="form-group">
+                <label>Cover Image (Optional)</label>
+                <input type="text" id="image" placeholder="Leave empty for auto-generated 3D cover">
+            </div>
 
-<select name="category" required>
-<option value="">Select Category</option>
-<option>Java</option>
-<option>Python</option>
-<option>C</option>
-<option>C++</option>
-<option>JavaScript</option>
-<option>Node.js</option>
-<option>MongoDB</option>
-<option>SQL</option>
-<option>Data Structures</option>
-<option>Algorithms</option>
-</select>
+            <div class="form-group">
+                <label>Description (Optional)</label>
+                <textarea id="description" rows="3" placeholder="Brief synopsis or key topics covered..."></textarea>
+            </div>
 
-<input
-type="text"
-name="image"
-placeholder="Book Image URL">
+            <button type="submit" id="submitBtn" class="btn-submit">➕ Add Book to Store</button>
+        </form>
 
-<textarea
-name="description"
-rows="4"
-placeholder="Book Description"></textarea>
-
-<button type="submit">
-Add Book
-</button>
-
-</form>
-
-<a href="/admin-dashboard">⬅️ Back to Dashboard</a>
-
+        <a href="/admin/manage-book" class="back-link">⬅️ Back to Manage Books</a>
+    </div>
 </div>
+
+<footer>
+    <p>© 2026 Online Book Store - Admin Panel</p>
+</footer>
+
+<script>
+document.getElementById("addBookForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.textContent = "Adding Book...";
+
+    const payload = {
+        title: document.getElementById("title").value.trim(),
+        author: document.getElementById("author").value.trim(),
+        price: Number(document.getElementById("price").value),
+        category: document.getElementById("category").value,
+        image: document.getElementById("image").value.trim(),
+        description: document.getElementById("description").value.trim()
+    };
+
+    try {
+        const res = await fetch("/api/books", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert("✅ Book added successfully!");
+            window.location.href = "/admin/manage-book";
+        } else {
+            const data = await res.json();
+            alert("⚠️ Failed to add book: " + (data.message || "Unknown error"));
+            btn.disabled = false;
+            btn.textContent = "➕ Add Book to Store";
+        }
+    } catch (err) {
+        alert("Server error: " + err.message);
+        btn.disabled = false;
+        btn.textContent = "➕ Add Book to Store";
+    }
+});
+</script>
 
 </body>
 </html>

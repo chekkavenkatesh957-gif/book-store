@@ -6,21 +6,21 @@
 <title>Admin Dashboard - Online Book Store</title>
 <link rel="stylesheet" href="/css/style.css">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
-body { background:#f4f6f9; min-height: 100vh; display: flex; flex-direction: column; }
-header { background:#0f172a; color:white; padding:15px 30px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background:#f4f6f9; min-height: 100vh; display: flex; flex-direction: column; color: #1e293b; }
+header { background:#0f172a; color:white; padding:15px 30px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 12px; }
 header h1 a { color: white; text-decoration: none; font-size: 22px; font-weight: 700; }
-nav a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 15px; font-weight: 500; font-size: 14px; transition: color 0.2s; }
+nav a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 12px; font-weight: 500; font-size: 13.5px; transition: color 0.2s; }
 nav a:hover, nav a.active { color: white; font-weight: 700; }
 .container { width:92%; max-width:1200px; margin:30px auto; flex: 1; }
 .page-header { margin-bottom: 25px; }
 .page-header h2 { color: #0f172a; font-size: 28px; font-weight: 800; }
 .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:20px; }
-.card { background:white; padding:22px; border-radius:12px; text-align:left; box-shadow:0 4px 15px rgba(0,0,0,.04); border:1px solid #e2e8f0; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+.card { background:white; padding:22px; border-radius:12px; text-align:left; box-shadow:0 4px 15px rgba(0,0,0,.04); border:1px solid #e2e8f0; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
 .card h2 { color:#64748b; margin-bottom:8px; font-size:13px; text-transform: uppercase; letter-spacing: 0.5px; }
 .card h1 { color: #0f172a; font-size: 32px; font-weight: 800; }
-.card.alert { border-left: 5px solid #f59e0b; background: #fffbeb; cursor: pointer; }
+.card.alert { border-left: 5px solid #f59e0b; background: #fffbeb; }
 .card.alert h1 { color: #b45309; }
 .card-icon { position: absolute; right: 18px; top: 20px; font-size: 32px; opacity: 0.8; }
 .menu { margin-top:35px; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; }
@@ -34,6 +34,8 @@ nav a:hover, nav a.active { color: white; font-weight: 700; }
 <header>
     <h1><a href="/admin/dashboard">🛠️ Admin Dashboard</a></h1>
     <nav>
+        <a href="/" target="_blank" style="background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 6px;">🏠 Storefront</a>
+        <a href="/orders" target="_blank" style="background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 6px;">📜 User Orders (Store)</a>
         <a href="/admin/dashboard" class="active">Dashboard</a>
         <a href="/admin/add-book">Add Book</a>
         <a href="/admin/manage-book">Manage Books</a>
@@ -46,16 +48,16 @@ nav a:hover, nav a.active { color: white; font-weight: 700; }
 <div class="container">
     <div class="page-header">
         <h2>👋 Welcome to Book Store Control Panel</h2>
-        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Monitor store stats, verify incoming UTR payments, and dispatch books.</p>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Monitor store stats, verify incoming PhonePe UTR payments, and dispatch books.</p>
     </div>
 
     <div class="cards">
-        <div class="card">
+        <div class="card" onclick="window.location.href='/admin/manage-book'" title="Click to view all books">
             <h2>📚 Total Books</h2>
             <h1 id="totalBooks">0</h1>
             <div class="card-icon">📖</div>
         </div>
-        <div class="card">
+        <div class="card" onclick="window.location.href='/admin/manage-user'" title="Click to view registered users">
             <h2>👥 Registered Users</h2>
             <h1 id="totalUsers">0</h1>
             <div class="card-icon">👤</div>
@@ -65,12 +67,12 @@ nav a:hover, nav a.active { color: white; font-weight: 700; }
             <h1 id="pendingOrders">0</h1>
             <div class="card-icon">🔔</div>
         </div>
-        <div class="card">
+        <div class="card" onclick="window.location.href='/admin/orders'" title="Click to view all orders">
             <h2>📦 Total Orders</h2>
             <h1 id="totalOrders">0</h1>
             <div class="card-icon">🚚</div>
         </div>
-        <div class="card">
+        <div class="card" onclick="window.location.href='/admin/orders'" title="Click to view verified sales">
             <h2>💰 Total Verified Sales</h2>
             <h1 id="totalSales">₹0</h1>
             <div class="card-icon">💵</div>
@@ -82,33 +84,44 @@ nav a:hover, nav a.active { color: white; font-weight: 700; }
         <a href="/admin/orders">
             <span class="menu-icon">📦</span>
             <div>
-                <div>Manage Orders &amp; UTR</div>
-                <small style="font-weight: normal; opacity: 0.75;">Verify payments &amp; track orders</small>
+                <div>Admin Orders &amp; UTR Verification</div>
+                <small style="font-weight: normal; opacity: 0.75;">Approve PhonePe UTR &amp; update order status</small>
+            </div>
+        </a>
+        <a href="/orders" target="_blank" style="border: 1px dashed #2563eb;">
+            <span class="menu-icon">📜</span>
+            <div>
+                <div>User Order History Page</div>
+                <small style="font-weight: normal; opacity: 0.75;">View storefront customer tracking page</small>
             </div>
         </a>
         <a href="/admin/manage-book">
             <span class="menu-icon">📚</span>
             <div>
-                <div>Manage Books</div>
-                <small style="font-weight: normal; opacity: 0.75;">Edit, update prices &amp; delete</small>
+                <div>Manage Books Inventory</div>
+                <small style="font-weight: normal; opacity: 0.75;">Edit, update prices &amp; delete books</small>
             </div>
         </a>
         <a href="/admin/add-book">
             <span class="menu-icon">➕</span>
             <div>
                 <div>Add New Book</div>
-                <small style="font-weight: normal; opacity: 0.75;">List a new title in store</small>
+                <small style="font-weight: normal; opacity: 0.75;">List a new title in store catalogue</small>
             </div>
         </a>
         <a href="/admin/manage-user">
             <span class="menu-icon">👥</span>
             <div>
-                <div>Manage Users</div>
-                <small style="font-weight: normal; opacity: 0.75;">View registered customer list</small>
+                <div>Manage Registered Users</div>
+                <small style="font-weight: normal; opacity: 0.75;">View customer list &amp; user details</small>
             </div>
         </a>
     </div>
 </div>
+
+<footer>
+    <p>© 2026 Online Book Store - Admin Panel</p>
+</footer>
 
 <script>
 async function loadDashboard() {
@@ -122,7 +135,9 @@ async function loadDashboard() {
         const serverOrders = await fetch("/api/orders").then(res => res.json()).catch(() => []);
         const localOrders = JSON.parse(localStorage.getItem("bookstoreOrderHistory")) || [];
         const orderMap = new Map();
-        serverOrders.forEach(o => orderMap.set(String(o._id || o.id), o));
+        if (Array.isArray(serverOrders)) {
+            serverOrders.forEach(o => orderMap.set(String(o._id || o.id), o));
+        }
         localOrders.forEach(o => { 
             const key = String(o._id || o.id || o.orderId);
             if (!orderMap.has(key)) orderMap.set(key, o); 
