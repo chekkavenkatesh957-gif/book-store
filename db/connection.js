@@ -12,24 +12,33 @@ if (configuredDnsServers?.length) {
   dns.setServers(["8.8.8.8", "8.8.4.4"]);
 }
 
-// Cache connection for serverless reuse
+// Cache connection promise for concurrent & serverless reuse
 let client;
 let db;
+let connectPromise = null;
 
 async function connectDB() {
-  if (db) return db; // ✅ Reuse existing connection (serverless caching)
+  if (db) return db;
+  if (connectPromise) return connectPromise;
 
   const uri = process.env.MONGO_URI;
   if (!uri) throw new Error("MONGO_URI is not defined in environment variables");
 
   client = new MongoClient(uri, {
-    serverSelectionTimeoutMS: 10000,
-    connectTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 15000,
+    connectTimeoutMS: 15000,
   });
-  await client.connect();
-  db = client.db("bookstore");
-  console.log("✅ MongoDB Atlas Connected");
-  return db;
+
+  connectPromise = client.connect().then(() => {
+    db = client.db("bookstore");
+    console.log("✅ MongoDB Atlas Connected");
+    return db;
+  }).catch((err) => {
+    connectPromise = null;
+    throw err;
+  });
+
+  return connectPromise;
 }
 
 function getDB() {
