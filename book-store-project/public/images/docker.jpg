@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 420" width="300" height="420">
+  <defs>
+    <linearGradient id="bg_docker" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c4a6e" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="overlay_docker" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15" />
+      <stop offset="50%" stop-color="#000000" stop-opacity="0" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.4" />
+    </linearGradient>
+  </defs>
+
+  <rect width="300" height="420" fill="url(#bg_docker)" rx="8" />
+  <rect x="0" y="0" width="12" height="420" fill="#ffffff" fill-opacity="0.1" />
+  <rect width="300" height="420" fill="url(#overlay_docker)" rx="8" />
+
+  <g stroke="#ffffff" stroke-opacity="0.06" stroke-width="1">
+    <line x1="30" y1="0" x2="30" y2="420" />
+    <line x1="270" y1="0" x2="270" y2="420" />
+    <line x1="0" y1="80" x2="300" y2="80" />
+    <line x1="0" y1="360" x2="300" y2="360" />
+  </g>
+
+  <rect x="30" y="35" width="140" height="22" rx="11" fill="#ffffff" fill-opacity="0.15" stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1" />
+  <text x="100" y="50" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#38bdf8" text-anchor="middle" letter-spacing="1.5">DEVOPS</text>
+
+  <text x="30" y="110" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" fill="#ffffff">
+    <tspan x="30" dy="0">Learning Docker</tspan>
+  </text>
+
+  <text x="30" y="156" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" fill="#e2e8f0">By Pethuru Raj</text>
+
+  <circle cx="150" cy="275" r="55" fill="#ffffff" fill-opacity="0.08" stroke="#38bdf8" stroke-opacity="0.3" stroke-width="2" />
+  <circle cx="150" cy="275" r="42" fill="#ffffff" fill-opacity="0.05" />
+  <text x="150" y="289" font-family="'Segoe UI Emoji', 'Apple Color Emoji', sans-serif" font-size="44" text-anchor="middle">🐳</text>
+
+  <rect x="180" y="368" width="90" height="24" rx="6" fill="#ffffff" fill-opacity="0.12" />
+  <text x="225" y="384" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="600" fill="#ffffff" text-anchor="middle">BESTSELLER</text>
+
+  <rect x="0" y="412" width="300" height="8" fill="#38bdf8" />
+</svg>

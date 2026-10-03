@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - Online Book Store</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+body { background:#f4f6f9; min-height: 100vh; display: flex; flex-direction: column; }
+header { background:#0f172a; color:white; padding:15px 30px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+header h1 a { color: white; text-decoration: none; font-size: 22px; font-weight: 700; }
+nav a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 15px; font-weight: 500; font-size: 14px; transition: color 0.2s; }
+nav a:hover, nav a.active { color: white; font-weight: 700; }
+.container { width:92%; max-width:1200px; margin:30px auto; flex: 1; }
+.page-header { margin-bottom: 25px; }
+.page-header h2 { color: #0f172a; font-size: 28px; font-weight: 800; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:20px; }
+.card { background:white; padding:22px; border-radius:12px; text-align:left; box-shadow:0 4px 15px rgba(0,0,0,.04); border:1px solid #e2e8f0; position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+.card h2 { color:#64748b; margin-bottom:8px; font-size:13px; text-transform: uppercase; letter-spacing: 0.5px; }
+.card h1 { color: #0f172a; font-size: 32px; font-weight: 800; }
+.card.alert { border-left: 5px solid #f59e0b; background: #fffbeb; cursor: pointer; }
+.card.alert h1 { color: #b45309; }
+.card-icon { position: absolute; right: 18px; top: 20px; font-size: 32px; opacity: 0.8; }
+.menu { margin-top:35px; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; }
+.menu a { background:white; color:#0f172a; text-decoration:none; padding:25px 20px; border-radius:12px; font-size:16px; font-weight:700; border:1px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,.04); display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
+.menu a:hover { background:#0f172a; color:white; border-color:#0f172a; transform:translateY(-2px); }
+.menu-icon { font-size: 26px; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1><a href="/admin/dashboard">🛠️ Admin Dashboard</a></h1>
+    <nav>
+        <a href="/admin/dashboard" class="active">Dashboard</a>
+        <a href="/admin/add-book">Add Book</a>
+        <a href="/admin/manage-book">Manage Books</a>
+        <a href="/admin/manage-user">Manage Users</a>
+        <a href="/admin/orders">Manage Orders</a>
+        <a href="/admin/login" style="background:#ef4444; padding:6px 12px; border-radius:6px; color:white;">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="page-header">
+        <h2>👋 Welcome to Book Store Control Panel</h2>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Monitor store stats, verify incoming UTR payments, and dispatch books.</p>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <h2>📚 Total Books</h2>
+            <h1 id="totalBooks">0</h1>
+            <div class="card-icon">📖</div>
+        </div>
+        <div class="card">
+            <h2>👥 Registered Users</h2>
+            <h1 id="totalUsers">0</h1>
+            <div class="card-icon">👤</div>
+        </div>
+        <div class="card alert" onclick="window.location.href='/admin/orders'" title="Click to review pending UTR payments">
+            <h2>⏳ Pending UTR Verification</h2>
+            <h1 id="pendingOrders">0</h1>
+            <div class="card-icon">🔔</div>
+        </div>
+        <div class="card">
+            <h2>📦 Total Orders</h2>
+            <h1 id="totalOrders">0</h1>
+            <div class="card-icon">🚚</div>
+        </div>
+        <div class="card">
+            <h2>💰 Total Verified Sales</h2>
+            <h1 id="totalSales">₹0</h1>
+            <div class="card-icon">💵</div>
+        </div>
+    </div>
+
+    <h3 style="margin-top: 35px; color: #0f172a; font-size: 18px;">Quick Management</h3>
+    <div class="menu">
+        <a href="/admin/orders">
+            <span class="menu-icon">📦</span>
+            <div>
+                <div>Manage Orders &amp; UTR</div>
+                <small style="font-weight: normal; opacity: 0.75;">Verify payments &amp; track orders</small>
+            </div>
+        </a>
+        <a href="/admin/manage-book">
+            <span class="menu-icon">📚</span>
+            <div>
+                <div>Manage Books</div>
+                <small style="font-weight: normal; opacity: 0.75;">Edit, update prices &amp; delete</small>
+            </div>
+        </a>
+        <a href="/admin/add-book">
+            <span class="menu-icon">➕</span>
+            <div>
+                <div>Add New Book</div>
+                <small style="font-weight: normal; opacity: 0.75;">List a new title in store</small>
+            </div>
+        </a>
+        <a href="/admin/manage-user">
+            <span class="menu-icon">👥</span>
+            <div>
+                <div>Manage Users</div>
+                <small style="font-weight: normal; opacity: 0.75;">View registered customer list</small>
+            </div>
+        </a>
+    </div>
+</div>
+
+<script>
+async function loadDashboard() {
+    try {
+        const books = await fetch("/api/books").then(res => res.json()).catch(() => []);
+        document.getElementById("totalBooks").innerText = books.length || 0;
+
+        const users = await fetch("/api/users").then(res => res.json()).catch(() => []);
+        document.getElementById("totalUsers").innerText = users.length || 0;
+
+        const serverOrders = await fetch("/api/orders").then(res => res.json()).catch(() => []);
+        const localOrders = JSON.parse(localStorage.getItem("bookstoreOrderHistory")) || [];
+        const orderMap = new Map();
+        serverOrders.forEach(o => orderMap.set(String(o._id || o.id), o));
+        localOrders.forEach(o => { 
+            const key = String(o._id || o.id || o.orderId);
+            if (!orderMap.has(key)) orderMap.set(key, o); 
+        });
+        
+        const allOrders = Array.from(orderMap.values());
+        document.getElementById("totalOrders").innerText = allOrders.length;
+
+        let pendingCount = 0;
+        let totalSales = 0;
+
+        allOrders.forEach(o => {
+            const pStatus = (o.paymentStatus || "").toLowerCase();
+            const method = (o.paymentMethod || "").toLowerCase();
+            const isCod = method.includes("cod") || method.includes("cash on delivery");
+
+            if (pStatus.includes("pending") || (!o.paymentStatus && !isCod)) {
+                pendingCount++;
+            }
+
+            if (pStatus.includes("verified") || pStatus.includes("approved")) {
+                const amount = Number(o.totalAmount || o.total || 0);
+                totalSales += amount;
+            }
+        });
+
+        document.getElementById("pendingOrders").innerText = pendingCount;
+        document.getElementById("totalSales").innerText = `₹${totalSales.toLocaleString('en-IN')}`;
+    } catch (err) { console.error(err); }
+}
+loadDashboard();
+</script>
+</body>
+</html>

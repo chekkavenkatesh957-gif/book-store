@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Manage Registered Users</title>
+
+<link rel="stylesheet" href="/css/style.css">
+<style>
+body { background: #f4f6f9; min-height: 100vh; display: flex; flex-direction: column; }
+header { background: #0f172a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+header h1 a { color: white; text-decoration: none; font-size: 22px; }
+nav a { color: rgba(255,255,255,0.85); text-decoration: none; margin-left: 15px; font-weight: 500; font-size: 14px; }
+nav a:hover, nav a.active { color: white; font-weight: 600; }
+.container { width: 92%; max-width: 1100px; margin: 30px auto; flex: 1; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+.page-header h2 { color: #0f172a; font-size: 26px; }
+.user-count-badge { background: #e0f2fe; color: #0369a1; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+.search-input { width: 100%; padding: 12px 18px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; margin-bottom: 20px; outline: none; background: white; }
+.search-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+.user-table-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; border: 1px solid #e2e8f0; }
+table { width: 100%; border-collapse: collapse; min-width: 650px; }
+th, td { padding: 14px 18px; text-align: left; }
+th { background: #0f172a; color: white; font-weight: 600; font-size: 14px; }
+tr:nth-child(even) { background-color: #f8fafc; }
+tr:hover { background-color: #f1f5f9; }
+.btn-delete { background: #ef4444; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+.btn-delete:hover { background: #dc2626; }
+.empty-msg { text-align: center; padding: 40px; color: #64748b; font-size: 16px; }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1><a href="/admin/dashboard">🛠️ Admin Dashboard</a></h1>
+    <nav>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/add-book">Add Book</a>
+        <a href="/admin/manage-book">Manage Books</a>
+        <a href="/admin/manage-user" class="active">Manage Users</a>
+        <a href="/admin/orders">Manage Orders</a>
+        <a href="/admin/login" style="background: #ef4444; padding: 6px 12px; border-radius: 6px; color: white;">Logout</a>
+    </nav>
+</header>
+
+<div class="container">
+
+    <div class="page-header">
+        <h2>👥 Registered Users Management</h2>
+        <div id="userCount" class="user-count-badge">Total Users: 0</div>
+    </div>
+
+    <input type="text" id="userSearch" class="search-input" placeholder="Search registered users by Name or Email..." oninput="filterUsers()">
+
+    <div class="user-table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    <th>Email Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <tr><td colspan="5" class="empty-msg">Loading registered users...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer>
+    <p>© 2026 Online Book Store - Admin Management Panel.</p>
+</footer>
+
+<script>
+let allUsers = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadUsers();
+});
+
+async function loadUsers() {
+    const tbody = document.getElementById("userTableBody");
+    const countBadge = document.getElementById("userCount");
+
+    try {
+        const res = await fetch("/api/users");
+        if (!res.ok) throw new Error("Failed to fetch users");
+        allUsers = await res.json();
+        
+        countBadge.textContent = `Total Users: ${allUsers.length}`;
+        renderUsers(allUsers);
+    } catch (err) {
+        console.error("Error loading users:", err);
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-msg" style="color: #ef4444;">Failed to load user list. Please check server connection.</td></tr>`;
+    }
+}
+
+function renderUsers(users) {
+    const tbody = document.getElementById("userTableBody");
+
+    if (!users || users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">No registered users found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.map((u, idx) => {
+        const userId = u._id ? `#USR-${u._id.substring(u._id.length - 6).toUpperCase()}` : `#USR-${idx + 1}`;
+        const rawId = u._id || u.id;
+
+        return `
+            <tr>
+                <td><strong>${idx + 1}</strong></td>
+                <td><code style="color: #0d47a1; font-weight: bold;">${userId}</code></td>
+                <td><strong>${escapeHtml(u.name || "N/A")}</strong></td>
+                <td>${escapeHtml(u.email || "N/A")}</td>
+                <td>
+                    <button class="btn-delete" onclick="deleteUser('${rawId}', '${escapeHtml(u.name || u.email)}')">🗑️ Delete User</button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function filterUsers() {
+    const term = document.getElementById("userSearch").value.toLowerCase().trim();
+    const filtered = allUsers.filter(u => 
+        (u.name || "").toLowerCase().includes(term) || 
+        (u.email || "").toLowerCase().includes(term) ||
+        (u._id || "").toLowerCase().includes(term)
+    );
+    renderUsers(filtered);
+}
+
+async function deleteUser(id, name) {
+    if (!confirm(`Are you sure you want to delete user "${name}"? This action cannot be undone.`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+        if (res.ok) {
+            alert(`User "${name}" has been deleted successfully.`);
+            loadUsers();
+        } else {
+            const data = await res.json();
+            alert(data.message || "Failed to delete user.");
+        }
+    } catch (err) {
+        alert("Server error. Please try again.");
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+</script>
+
+</body>
+</html>

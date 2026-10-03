@@ -190,8 +190,10 @@ footer { background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); position: rel
     <div class="auth-card">
 
         <div class="auth-icon">🚀</div>
-        <h2>Create Account</h2>
-        <p class="subtitle">Join thousands of book lovers — free &amp; instant access</p>
+        <div id="signupIntro">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join thousands of book lovers — free &amp; instant access</p>
+        </div>
 
         <form id="signupForm">
             <div class="field">
@@ -252,6 +254,26 @@ footer { background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); position: rel
             </button>
         </form>
 
+        <section id="otpPanel" hidden aria-labelledby="otpHeading">
+            <h2 id="otpHeading">Verify your email</h2>
+            <p class="subtitle">Enter the six-digit code sent to <strong id="otpEmail"></strong>.</p>
+            <form id="otpForm">
+                <div class="field">
+                    <label for="otpCode">Verification code</label>
+                    <div class="input-wrap">
+                        <span class="i-icon">✉️</span>
+                        <input type="text" id="otpCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required>
+                    </div>
+                    <p class="subtitle">The code expires after 10 minutes.</p>
+                </div>
+                <button type="submit" id="verifyOtpBtn" class="btn-auth">Verify and create account</button>
+            </form>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+                <button type="button" id="resendOtpBtn" class="btn-auth">Resend code</button>
+                <button type="button" id="editSignupBtn" class="btn-auth">Edit details</button>
+            </div>
+        </section>
+
         <div class="auth-switch">
             Already have an account? <a href="/login">Login here →</a>
         </div>
@@ -266,7 +288,14 @@ footer { background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); position: rel
 <script src="/js/auth.js"></script>
 
 <script>
-document.getElementById("signupForm").addEventListener("submit", async function(e){
+const signupForm = document.getElementById("signupForm");
+const otpPanel = document.getElementById("otpPanel");
+const otpForm = document.getElementById("otpForm");
+const resendOtpBtn = document.getElementById("resendOtpBtn");
+let pendingSignupEmail = "";
+let resendCountdownTimer;
+
+signupForm.addEventListener("submit", async function(e){
     e.preventDefault();
 
     const name            = document.getElementById("name").value.trim();
@@ -297,12 +326,16 @@ document.getElementById("signupForm").addEventListener("submit", async function(
 
         const data = await safeParseResponse(response);
 
-        if (response.ok) {
-            if (data.user) {
-                localStorage.setItem("user", JSON.stringify(data.user));
-            }
-            showToast(data.message || "🎉 Account created! Welcome aboard!");
-            setTimeout(() => { window.location.href = "/"; }, 1400);
+        const codeAlreadySent = response.status === 429 && /code was just sent/i.test(data.message || "");
+        if (response.ok || codeAlreadySent) {
+            pendingSignupEmail = data.email || email;
+            document.getElementById("otpEmail").textContent = pendingSignupEmail;
+            document.getElementById("signupIntro").hidden = true;
+            signupForm.hidden = true;
+            otpPanel.hidden = false;
+            document.getElementById("otpCode").focus();
+            startResendCooldown(60);
+            showToast(data.message || "Verification code sent. Check your email.");
         } else {
             showToast(data.message || "Signup failed. Please try again.", true);
         }
@@ -313,6 +346,88 @@ document.getElementById("signupForm").addEventListener("submit", async function(
         submitBtn.innerHTML = "✅ Create My Account";
     }
 });
+
+otpForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const verifyBtn = document.getElementById("verifyOtpBtn");
+    const code = document.getElementById("otpCode").value.trim();
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = "Verifying...";
+
+    try {
+        const response = await fetch("/api/auth/verify-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: pendingSignupEmail, code })
+        });
+        const data = await safeParseResponse(response);
+        if (response.ok && data.user) {
+            setCurrentUser(data.user);
+            showToast(data.message || "Email verified. Your account is ready.");
+            setTimeout(() => { window.location.href = "/"; }, 1200);
+        } else {
+            showToast(data.message || "Could not verify the code.", true);
+        }
+    } catch (err) {
+        showToast(err.message || "Request failed. Please try again.", true);
+    } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = "Verify and create account";
+    }
+});
+
+resendOtpBtn.addEventListener("click", async function() {
+    if (!pendingSignupEmail) return;
+    resendOtpBtn.disabled = true;
+    resendOtpBtn.textContent = "Sending...";
+
+    try {
+        const response = await fetch("/api/auth/resend-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: pendingSignupEmail })
+        });
+        const data = await safeParseResponse(response);
+        if (response.ok) {
+            document.getElementById("otpCode").value = "";
+            startResendCooldown(60);
+            showToast(data.message || "A new verification code was sent.");
+        } else {
+            resendOtpBtn.disabled = false;
+            resendOtpBtn.textContent = "Resend code";
+            showToast(data.message || "Could not resend the code.", true);
+        }
+    } catch (err) {
+        resendOtpBtn.disabled = false;
+        resendOtpBtn.textContent = "Resend code";
+        showToast(err.message || "Request failed. Please try again.", true);
+    }
+});
+
+document.getElementById("editSignupBtn").addEventListener("click", () => {
+    clearInterval(resendCountdownTimer);
+    otpPanel.hidden = true;
+    document.getElementById("signupIntro").hidden = false;
+    signupForm.hidden = false;
+    document.getElementById("email").focus();
+});
+
+function startResendCooldown(seconds) {
+    clearInterval(resendCountdownTimer);
+    let remaining = Math.max(0, Number(seconds) || 0);
+    const updateButton = () => {
+        resendOtpBtn.disabled = remaining > 0;
+        resendOtpBtn.textContent = remaining > 0 ? `Resend in ${remaining}s` : "Resend code";
+    };
+    updateButton();
+    if (remaining > 0) {
+        resendCountdownTimer = setInterval(() => {
+            remaining -= 1;
+            updateButton();
+            if (remaining <= 0) clearInterval(resendCountdownTimer);
+        }, 1000);
+    }
+}
 
 function togglePw(inputId, btn) {
     const input = document.getElementById(inputId);

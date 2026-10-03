@@ -18,23 +18,37 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Connect to MongoDB Atlas on every request (Vercel serverless safe)
-app.use(async (req, res, next) => {
+const fs = require("fs");
+
+// ========================
+// Static Files & Image MIME Handling
+// ========================
+app.use((req, res, next) => {
+  if (req.path.startsWith("/images/")) {
+    if (/\.(jpg|png)$/i.test(req.path)) {
+      const svgPath = path.join(__dirname, "public", req.path.replace(/\.(jpg|png)$/i, ".svg"));
+      if (fs.existsSync(svgPath)) {
+        res.setHeader("Content-Type", "image/svg+xml");
+        return res.sendFile(svgPath);
+      }
+    }
+  }
+  next();
+});
+
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/admin", express.static(path.join(__dirname, "admin")));
+
+// ✅ Connect to MongoDB Atlas on API requests only
+app.use("/api", async (req, res, next) => {
   try {
     await connectDB();
     next();
   } catch (err) {
-    console.error("❌ DB Connection failed:", err.message);
-    res.status(500).json({ message: "Database connection failed. Please try again." });
+    console.error("❌ DB Connection failed:", err.message, err.stack);
+    res.status(500).json({ message: "Database connection failed. Please try again.", error: err.message });
   }
 });
-
-
-// ========================
-// Static Files
-// ========================
-app.use(express.static(path.join(__dirname, "public")));
-app.use("/admin", express.static(path.join(__dirname, "admin")));
 
 // ========================
 // API Routes
@@ -269,7 +283,8 @@ app.get(["/orders", "/orders.html", "/order-history"], (req, res) => {
 });
 
 // ========================
-/
+// Admin Pages
+// ========================
 app.get(["/admin", "/admin/dashboard", "/admin/dashboard.html"], (req, res) => {
   res.sendFile(path.join(__dirname, "admin", "admin-dashboard.html"));
 });
@@ -337,5 +352,5 @@ if (require.main === module) {
   });
 }
 
-module.exports = app;/ Admin Pages
+module.exports = app;
 // ========================

@@ -1,4 +1,16 @@
 const { MongoClient, ObjectId } = require("mongodb");
+const dns = require("node:dns");
+
+const configuredDnsServers = process.env.MONGO_DNS_SERVERS
+  ?.split(",")
+  .map((server) => server.trim())
+  .filter(Boolean);
+
+if (configuredDnsServers?.length) {
+  dns.setServers(configuredDnsServers);
+} else if (dns.getServers().some((server) => server === "127.0.0.1" || server === "::1")) {
+  dns.setServers(["8.8.8.8", "8.8.4.4"]);
+}
 
 // Cache connection for serverless reuse
 let client;
@@ -10,7 +22,10 @@ async function connectDB() {
   const uri = process.env.MONGO_URI;
   if (!uri) throw new Error("MONGO_URI is not defined in environment variables");
 
-  client = new MongoClient(uri);
+  client = new MongoClient(uri, {
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+  });
   await client.connect();
   db = client.db("bookstore");
   console.log("✅ MongoDB Atlas Connected");
