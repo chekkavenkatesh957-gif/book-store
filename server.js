@@ -25,6 +25,7 @@ const fs = require("fs");
 // ========================
 app.use((req, res, next) => {
   if (req.path.startsWith("/images/")) {
+    res.setHeader("Cache-Control", "public, max-age=86400, immutable");
     if (/\.(jpg|png)$/i.test(req.path)) {
       const svgPath = path.join(__dirname, "public", req.path.replace(/\.(jpg|png)$/i, ".svg"));
       if (fs.existsSync(svgPath)) {

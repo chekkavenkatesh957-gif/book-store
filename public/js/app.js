@@ -121,18 +121,37 @@ async function safeParseResponse(res) {
 }
 
 async function loadBooks() {
+    // 1. Instant 0ms render from client session cache
+    try {
+        const cached = sessionStorage.getItem("bookstoreCachedBooks");
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                allBooks = parsed;
+                renderCategoryChips();
+                applyFilters();
+            }
+        }
+    } catch (e) {}
+
+    // 2. Fetch fresh from server and update cache
     try {
         const response = await fetch(API_URL);
         const data = await safeParseResponse(response);
         if (!response.ok || !Array.isArray(data)) throw new Error(data.message || "Failed to fetch books");
         allBooks = data;
+        try {
+            sessionStorage.setItem("bookstoreCachedBooks", JSON.stringify(data));
+        } catch (e) {}
         renderCategoryChips();
         applyFilters();
     } catch (error) {
-        console.error("Error loading books:", error);
-        const booksList = document.getElementById("booksList");
-        if (booksList) {
-            booksList.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #ef4444; font-weight: bold; padding: 40px;'>Unable to load books. Please check server connection.</p>";
+        if (!allBooks || allBooks.length === 0) {
+            console.error("Error loading books:", error);
+            const booksList = document.getElementById("booksList");
+            if (booksList) {
+                booksList.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #ef4444; font-weight: bold; padding: 40px;'>Unable to load books. Please check server connection.</p>";
+            }
         }
     }
 }

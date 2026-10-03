@@ -2,6 +2,16 @@ const express = require("express");
 const router = express.Router();
 const { books, ObjectId } = require("../models/book");
 
+// In-memory cache for fast response times
+let cachedBooks = null;
+let lastCacheTime = 0;
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
+function invalidateCache() {
+  cachedBooks = null;
+  lastCacheTime = 0;
+}
+
 function getCoverImageForBook(title, category) {
   const t = (title || "").toLowerCase();
   const c = (category || "").toLowerCase();
@@ -45,18 +55,32 @@ function getCoverImageForBook(title, category) {
   return "default-book.svg";
 }
 
-// Get all books
+// Get all books (with in-memory & Edge caching)
 router.get("/", async (req, res) => {
   try {
+    const now = Date.now();
+    // Return from in-memory cache if fresh
+    if (cachedBooks && (now - lastCacheTime < CACHE_TTL_MS)) {
+      res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+      return res.json(cachedBooks);
+    }
+
     const allBooks = await books().find({}).toArray();
-    const booksWithImages = allBooks.map((b) => {
+    cachedBooks = allBooks.map((b) => {
       if (!b.image || b.image.trim() === "" || b.image.endsWith(".jpg") || b.image.endsWith(".png")) {
         b.image = getCoverImageForBook(b.title, b.category);
       }
       return b;
     });
-    res.json(booksWithImages);
+    lastCacheTime = now;
+
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+    res.json(cachedBooks);
   } catch (err) {
+    // If DB has temporary hiccup, serve stale cache if available
+    if (cachedBooks) {
+      return res.json(cachedBooks);
+    }
     res.status(500).json({ message: err.message });
   }
 });
@@ -69,6 +93,7 @@ router.post("/", async (req, res) => {
       bookData.image = getCoverImageForBook(bookData.title, bookData.category);
     }
     const result = await books().insertOne(bookData);
+    invalidateCache();
     const newBook = { _id: result.insertedId, ...bookData };
     res.status(201).json(newBook);
   } catch (err) {
@@ -89,6 +114,7 @@ router.put("/:id", async (req, res) => {
       { returnDocument: "after" }
     );
     if (!result) return res.status(404).json({ message: "Book not found" });
+    invalidateCache();
     res.json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -100,6 +126,7 @@ router.delete("/:id", async (req, res) => {
   try {
     const result = await books().deleteOne({ _id: new ObjectId(req.params.id) });
     if (result.deletedCount === 0) return res.status(404).json({ message: "Book not found" });
+    invalidateCache();
     res.json({ message: "Book deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
